@@ -40,6 +40,8 @@ export type TextBlock = {
   anchor: "t" | "ctr" | "b";
   /** rotation in degrees as written in the deck (e.g. 270 for the vertical row labels) */
   rot?: number;
+  /** the deck's wrap mode; "none" means the text must stay on one line (image captions) */
+  wrap?: "square" | "none";
   /** the deck's own normAutofit font scale (1 = none) and line-spacing reduction */
   fontScale?: number;
   lnSpcReduction?: number;

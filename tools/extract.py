@@ -16,6 +16,7 @@ Deliberately faithful to the deck:
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import sys
@@ -483,6 +484,31 @@ GRID_MARGIN = 0.05          # inches kept clear of the slide edge
 GRID_GAP = 0.08             # inches between images in a row / between rows
 
 
+def _label_band(slide: dict, top: float, bottom: float) -> tuple[float, float]:
+    """Horizontal band a grid may use without covering text that shares its rows.
+
+    Uses each block's *rotated* bounding box, so the vertical row labels on the image grids
+    (rot 270) are measured where they actually appear.
+    """
+    left, right = 0.0, SLIDE_W
+    for t in slide["texts"]:
+        w, h = t["w"], t["h"]
+        if w <= 0 or h <= 0:
+            continue
+        rad = math.radians(t.get("rot") or 0)
+        c, sn = abs(math.cos(rad)), abs(math.sin(rad))
+        bw, bh = w * c + h * sn, w * sn + h * c
+        cx, cy = t["x"] + w / 2, t["y"] + h / 2
+        if cy + bh / 2 < top or cy - bh / 2 > bottom:
+            continue                                  # shares no rows with the grid
+        x0, x1 = cx - bw / 2, cx + bw / 2
+        if x1 <= SLIDE_W / 3:
+            left = max(left, x1)
+        elif x0 >= 2 * SLIDE_W / 3:
+            right = min(right, x0)
+    return left, right
+
+
 def _cluster_rows(pics: list[dict], tol: float = 0.6) -> list[list[dict]]:
     rows: list[list[dict]] = []
     for p in sorted(pics, key=lambda p: p["y"] + p["h"] / 2):
@@ -520,24 +546,29 @@ def normalise_grids(slide: dict) -> bool:
         if max(hs) - min(hs) > 0.15 * max(hs):      # not a filmstrip, leave it alone
             return False
 
-    counts = {len(r) for r in rows}
-    columns = max(counts)
-    # one width per column, so rows share a grid
+    columns = max(len(r) for r in rows)
+    row_h = [max(p["h"] for p in row) for row in rows]      # every image in a row shares a height
+    # one width per column, so rows share a grid: measure with the row's *final* height,
+    # otherwise an image ends up wider than its cell and overlaps its neighbour
     col_w = [0.0] * columns
-    for row in rows:
+    for row, rh in zip(rows, row_h):
         for i, p in enumerate(row):
-            col_w[i] = max(col_w[i], p["w"] * (row[0]["h"] / p["h"]))
-    row_h = [max(p["h"] for p in row) for row in rows]
+            col_w[i] = max(col_w[i], p["w"] * (rh / p["h"]))
 
     total_w = sum(col_w) + GRID_GAP * (columns - 1)
     total_h = sum(row_h) + GRID_GAP * (len(rows) - 1)
-    avail_w, avail_h = SLIDE_W - 2 * GRID_MARGIN, SLIDE_H - 2 * GRID_MARGIN
+    # stay clear of row labels that sit beside the grid
+    band_l, band_r = _label_band(slide, min(p["y"] for p in pics),
+                                 max(p["y"] + p["h"] for p in pics))
+    band_l += GRID_GAP
+    band_r -= GRID_GAP
+    avail_w, avail_h = max(2.0, band_r - band_l), SLIDE_H - 2 * GRID_MARGIN
     scale = min(1.0, avail_w / total_w, avail_h / total_h)
     col_w = [w * scale for w in col_w]
     row_h = [h * scale for h in row_h]
     total_w, total_h = sum(col_w) + GRID_GAP * (columns - 1), sum(row_h) + GRID_GAP * (len(rows) - 1)
 
-    x0 = (SLIDE_W - total_w) / 2
+    x0 = band_l + (avail_w - total_w) / 2
     y0 = (SLIDE_H - total_h) / 2
     y = y0
     for row, h in zip(rows, row_h):
@@ -651,6 +682,7 @@ def main() -> None:
                         break
                 geom5 = _raw_box(node)
                 rot_deg = geom5[4] if geom5 else 0.0
+                wrap_m = re.search(r'<a:bodyPr[^>]*wrap="(\w+)"', node)
                 autofit = re.search(r'<a:normAutofit([^>]*)/>', node)
                 font_scale = 1.0
                 ln_reduce = 0.0
@@ -707,6 +739,7 @@ def main() -> None:
                     "w": geom5[2] if geom5 else inherited.get("w", 0),
                     "h": geom5[3] if geom5 else inherited.get("h", 0),
                     "rot": round(rot_deg, 1),
+                    "wrap": wrap_m.group(1) if wrap_m else "square",
                     "fontScale": round(font_scale, 4),
                     "lnSpcReduction": round(ln_reduce, 4),
                     "size": (int(sizes[0]) if sizes else None) or inherited.get("sz") or title_sz,

@@ -247,6 +247,7 @@ export function SlideView({
                           ? Math.round(p.spcBefPt * (PX_PER_IN / 72) * 10) / 10
                           : undefined,
                         textAlign: p.algn === "ctr" ? "center" : p.algn === "r" ? "right" : "left",
+                        whiteSpace: t.wrap === "none" ? "nowrap" : undefined,
                         paddingLeft: bullet === "none" ? 0 : pad,
                         textIndent: bullet === "none" ? 0 : hang,
                       }}

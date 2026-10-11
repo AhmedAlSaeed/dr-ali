@@ -30,8 +30,10 @@ const collect = () =>
           w: r.width / scale,
           h: r.height / scale,
         };
-        const overflowsBox = el.getAttribute("data-block") === "text"
-          ? el.scrollHeight - el.clientHeight > 2
+        // wrap="none" captions can overflow sideways, so check both axes
+        const isText = el.getAttribute("data-block") === "text";
+        const overflowsBox = isText
+          ? el.scrollHeight - el.clientHeight > 2 || el.scrollWidth - el.clientWidth > 2
           : false;
         const text = (el.innerText ?? "").replace(/\s+/g, " ").trim().slice(0, 42);
         return {
@@ -73,7 +75,7 @@ for (const [name, positions] of routes) {
             .join("+"),
           box: `x${Math.round(b.rel.x)} y${Math.round(b.rel.y)} ${Math.round(b.rel.w)}x${Math.round(b.rel.h)}`,
           text: b.text,
-          need: `${Math.round(b.contentH)}px content in ${Math.round(b.boxH)}px box`,
+          need: `${Math.round(b.contentH)}px tall in ${Math.round(b.boxH)}px box`,
         });
       }
     }
