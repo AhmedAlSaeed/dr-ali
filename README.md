@@ -1,5 +1,7 @@
 # Fellow Case Conference — website
 
+**Live: <https://ahmedalsaeed.github.io/dr-ali/>** · repo: `AhmedAlSaeed/dr-ali`
+
 A small static site for the twelve-case neuroradiology conference, built from
 `AliFellow.pptx`. Replaces the macro-driven PowerPoint flow: no `.pptm`, no macro prompts,
 works in any browser.
@@ -105,9 +107,9 @@ across all 78 slides**.
 
 ## Deploy
 
-`.github/workflows/deploy-pages.yml` builds and deploys to GitHub Pages on every push to `main`
-(typecheck → build → upload). Enable it once with **Settings → Pages → Source: GitHub Actions**;
-the URL is then `https://<user>.github.io/<repo>/`.
+Live at **<https://ahmedalsaeed.github.io/dr-ali/>**, deployed from `main` by
+`.github/workflows/deploy-pages.yml` (typecheck → build → upload → deploy) — currently
+[GitHub Pages](https://github.com/AhmedAlSaeed/dr-ali/deployments) with **Source: GitHub Actions**.
 
 It works as a *project* page (served from `/<repo>/`, not the domain root) because routing is
 hash-based and assets are referenced relatively — no SPA 404 rewrite is needed. No deck is needed
