@@ -113,8 +113,11 @@ Two more normalisations the deck needed:
   (not applied with CSS), and the picture then fills its frame exactly as the deck does, so aspect
   ratios come out right (median frame-vs-file mismatch 0.03%).
 - **Image grids.** On 16 slides the grids are rebuilt: rows share a top and height, columns share
-  x positions across rows, gaps are uniform (0.08in), the block is centred and scaled to fit
-  inside the slide, and it stays clear of text beside it (case 6 keeps text left, images right).
+  x positions across rows, gaps are uniform (0.08in), the block is centred and scaled to fit inside
+  the slide, and it stays clear of the slide's other content — text beside it (case 6 keeps the text
+  left, images right) and text above or below it (case 2's time-point labels, case 6's 2020/2023/2026
+  captions). Centring used to carry a grid up over those captions; the block is now clamped out of
+  the text's band instead of running into it.
 - **Rotated text** (`rot="270deg"` row labels) is rendered rotated, placed by its rotated bounding
   box.
 

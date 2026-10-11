@@ -561,6 +561,35 @@ def _label_band(slide: dict, top: float, bottom: float,
     return left, right, side
 
 
+def _label_band_v(slide: dict, left: float, right: float,
+                  top: float, bottom: float) -> tuple[float, float]:
+    """Vertical band a grid may use without covering text above or below it.
+
+    A caption over a filmstrip (case 2's time-point labels) or a credit under a figure sets the
+    limit; only text that overlaps the pictures horizontally can collide with them, and a label
+    that sits *inside* the picture band (an intentional overlay) is left alone.
+    """
+    lo, hi = GRID_MARGIN, SLIDE_H - GRID_MARGIN
+    for t in slide["texts"]:
+        w, h = t["w"], t["h"]
+        if w <= 0 or h <= 0:
+            continue
+        rad = math.radians(t.get("rot") or 0)
+        c, sn = abs(math.cos(rad)), abs(math.sin(rad))
+        bw, bh = w * c + h * sn, w * sn + h * c
+        cx, cy = t["x"] + w / 2, t["y"] + h / 2
+        overlap_x = min(cx + bw / 2, right) - max(cx - bw / 2, left)
+        if overlap_x < 0.2:                            # not over the pictures' columns
+            continue
+        if cy + bh / 2 <= top + 0.15:                  # sits above the pictures
+            lo = max(lo, cy + bh / 2 + GRID_GAP)
+        elif cy - bh / 2 >= bottom - 0.15:             # sits below them
+            hi = min(hi, cy - bh / 2 - GRID_GAP)
+    if hi - lo < 2.0:                                  # never squeeze the grid to nothing
+        return GRID_MARGIN, SLIDE_H - GRID_MARGIN
+    return lo, hi
+
+
 def _cluster_rows(pics: list[dict], tol: float = 0.6) -> list[list[dict]]:
     rows: list[list[dict]] = []
     for p in sorted(pics, key=lambda p: p["y"] + p["h"] / 2):
@@ -584,6 +613,10 @@ def normalise_grids(slide: dict) -> bool:
     columns don't line up between rows, and the block can run past the slide edge. Where a grid
     is detected (two or more rows, or a filmstrip of three) it is rebuilt: equal heights per row,
     shared column widths, equal gaps, centred, and scaled down if it would not fit.
+
+    The rebuilt block also has to keep out of the slide's other content: text beside it (case 6's
+    diagnosis slide, case 8's rotated row labels) sets the horizontal band, text above or below it
+    (case 2's time-point captions) the vertical one.
     """
     pics = slide["pictures"]
     if len(pics) < 3:
@@ -609,12 +642,14 @@ def normalise_grids(slide: dict) -> bool:
 
     total_w = sum(col_w) + GRID_GAP * (columns - 1)
     total_h = sum(row_h) + GRID_GAP * (len(rows) - 1)
+    pic_top, pic_bottom = min(p["y"] for p in pics), max(p["y"] + p["h"] for p in pics)
+    pic_x0, pic_x1 = min(p["x"] for p in pics), max(p["x"] + p["w"] for p in pics)
     # stay clear of text that sits beside the grid; `side` says which side that is
-    band_l, band_r, side = _label_band(slide, min(p["y"] for p in pics),
-                                       max(p["y"] + p["h"] for p in pics), pics)
+    band_l, band_r, side = _label_band(slide, pic_top, pic_bottom, pics)
     band_l += GRID_GAP
     band_r -= GRID_GAP
-    pic_x0, pic_x1 = min(p["x"] for p in pics), max(p["x"] + p["w"] for p in pics)
+    # ... and of text above or below it, which fixes the vertical band just as tightly
+    band_t, band_b = _label_band_v(slide, pic_x0, pic_x1, pic_top, pic_bottom)
 
     if side == "left":                 # hug the text, as the deck does, so a wide title
         left_edge = max(band_l, pic_x0)  # cannot end up over the pictures
@@ -624,7 +659,7 @@ def normalise_grids(slide: dict) -> bool:
     else:
         left_edge, avail_w = band_l, band_r - band_l
 
-    avail_h = SLIDE_H - 2 * GRID_MARGIN
+    avail_h = band_b - band_t
     scale = min(1.0, max(2.0, avail_w) / total_w, avail_h / total_h)
     col_w = [w * scale for w in col_w]
     row_h = [h * scale for h in row_h]
@@ -636,7 +671,10 @@ def normalise_grids(slide: dict) -> bool:
         x0 = left_edge
     else:
         x0 = left_edge + (avail_w - total_w) / 2
-    y0 = (SLIDE_H - total_h) / 2
+    # vertically, keep the deck's "centred on the slide" placement, then pull it out of any
+    # caption above or below — clamping rather than re-centring, so a slide whose grid already
+    # sat where the deck put it does not drift
+    y0 = min(max((SLIDE_H - total_h) / 2, band_t), max(band_t, band_b - total_h))
     y = y0
     for row, h in zip(rows, row_h):
         x = x0
