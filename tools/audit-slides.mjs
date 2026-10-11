@@ -30,11 +30,21 @@ const collect = () =>
           w: r.width / scale,
           h: r.height / scale,
         };
-        // wrap="none" captions can overflow sideways, so check both axes
         const isText = el.getAttribute("data-block") === "text";
-        const overflowsBox = isText
-          ? el.scrollHeight - el.clientHeight > 2 || el.scrollWidth - el.clientWidth > 2
-          : false;
+        // vertical: text taller than its placeholder. horizontal: wrap="none" text may sit
+        // wider than its box (the deck allows that), so compare the ink against the slide.
+        const overflowsBox = isText ? el.scrollHeight - el.clientHeight > 2 : false;
+        let inkOutside = false;
+        if (isText) {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const ink = range.getBoundingClientRect();
+          if (ink.width || ink.height) {
+            const pad = 1 * scale;
+            inkOutside = ink.left < c.left - pad || ink.top < c.top - pad ||
+                         ink.right > c.right + pad || ink.bottom > c.bottom + pad;
+          }
+        }
         const text = (el.innerText ?? "").replace(/\s+/g, " ").trim().slice(0, 42);
         return {
           text,
@@ -42,7 +52,7 @@ const collect = () =>
           contentH: el.scrollHeight / scale,
           boxH: el.clientHeight / scale,
           block: el.getAttribute("data-block"),
-          overflowsBox,
+          overflowsBox, inkOutside,
           outside:
             rel.x < -1 || rel.y < -1 || rel.x + rel.w > 1281 || rel.y + rel.h > 721,
         };
@@ -65,12 +75,13 @@ for (const [name, positions] of routes) {
     const blocks = await collect();
     if (!blocks) continue;
     for (const b of blocks) {
-      if (b.overflowsBox || b.outside) {
+      if (b.overflowsBox || b.outside || b.inkOutside) {
         problems.push({
           route: name,
           slide: positions[i],
           n: i + 1,
-          kind: [b.block, b.outside ? "OUTSIDE-SLIDE" : "", b.overflowsBox ? "TEXT-TALLER-THAN-BOX" : ""]
+          kind: [b.block, b.outside ? "BOX-OUTSIDE-SLIDE" : "", b.inkOutside ? "TEXT-INK-OUTSIDE-SLIDE" : "",
+                 b.overflowsBox ? "TEXT-TALLER-THAN-BOX" : ""]
             .filter(Boolean)
             .join("+"),
           box: `x${Math.round(b.rel.x)} y${Math.round(b.rel.y)} ${Math.round(b.rel.w)}x${Math.round(b.rel.h)}`,

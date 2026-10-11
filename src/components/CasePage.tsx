@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
   ChevronLeft,
@@ -100,24 +99,78 @@ export function CasePage({
     window.location.hash = `#/c/${n}`;
   }, []);
 
+  // ---- swipe (touch) and click-to-advance -----------------------------------
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const suppressClick = useRef(false);
+  const markSuppressed = () => {
+    suppressClick.current = true;
+    window.setTimeout(() => (suppressClick.current = false), 400);
+  };
+  const consumed = () => {
+    if (!suppressClick.current) return false;
+    suppressClick.current = false;
+    return true;
+  };
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse") return;
+    swipe.current = { x: e.clientX, y: e.clientY };
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    const start = swipe.current;
+    swipe.current = null;
+    if (!start || e.pointerType === "mouse") return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    // horizontal only, so a vertical drag still scrolls the page
+    if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    markSuppressed();
+    if (dx < 0) next();
+    else prev();
+  };
+  const tapToAdvance = () => {
+    if (consumed()) return;
+    next();
+  };
+  const openImage = (picture: Picture) => {
+    if (consumed()) return;           // the tap that ended a swipe must not also zoom
+    setZoom(picture);
+  };
+
   // ---- fullscreen -----------------------------------------------------------
   // The present layout does not exist until React commits, so the fullscreen request has to
   // wait for the ref — calling it straight from the click handler was a no-op.
-  const enterPresent = useCallback(() => setPresent(true), []);
-
-  useEffect(() => {
-    if (!present) return;
-    const el = presentRef.current;
-    if (el && !document.fullscreenElement) {
+  // Fullscreen the document itself, synchronously from the click/keypress that asked for it:
+  // the request needs the user gesture, and <html> never unmounts, so presentation continues when
+  // moving between cases. Where the API is missing (iOS Safari) the overlay alone fills the
+  // viewport. The overlay is deliberately not the fullscreen element.
+  const enterPresent = useCallback(() => {
+    setPresent(true);
+    const el = document.documentElement;
+    const canFullscreen =
+      typeof el.requestFullscreen === "function" && document.fullscreenEnabled === true;
+    if (canFullscreen && !document.fullscreenElement) {
       el.requestFullscreen().catch(() => {
-        /* refused (no user gesture / policy): the overlay still covers the viewport */
+        /* refused (policy / no gesture): the overlay still covers the viewport */
       });
     }
+  }, []);
+
+  // keep the page behind from scrolling under the overlay on touch devices
+  useEffect(() => {
+    if (!present) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
   }, [present]);
 
   const exitPresent = useCallback(async () => {
     setPresent(false);
-    if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
+    if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+      await document.exitFullscreen().catch(() => {});
+    }
   }, []);
 
   useEffect(() => {
@@ -127,6 +180,14 @@ export function CasePage({
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
+
+  // Moving to another case restarts at its first slide. Done with state rather than a React key,
+  // because remounting would destroy the fullscreen element and drop out of presentation.
+  useEffect(() => {
+    setIndex(0);
+    setStep(0);
+    setZoom(null);
+  }, [caseN]);
 
   // ---- remember position, auto-complete on the last slide --------------------
   useEffect(() => {
@@ -206,8 +267,15 @@ export function CasePage({
     return (
       <div
         ref={presentRef}
+        data-slide-index={index}
         className="fixed inset-0 z-50 flex h-screen w-screen flex-col"
-        style={{ background: theme.background, color: theme.foreground }}
+        style={{
+          background: theme.background,
+          color: theme.foreground,
+          // dvh where supported so mobile browser chrome doesn't clip the slide; the class
+          // above stays as the fallback when the value is unsupported
+          height: "100dvh",
+        }}
       >
         <header
           className="flex shrink-0 items-center gap-3 border-b px-3 py-2"
@@ -226,11 +294,25 @@ export function CasePage({
             <span className="text-xs opacity-60">{entry?.diagnosis}</span>
           )}
           <span className="ml-auto flex items-center gap-3 text-xs opacity-70">{stepDots}</span>
-          {atEnd && nextHref && (
-            <Button variant="secondary" size="sm" onClick={() => (window.location.hash = nextHref)}>
-              Next case <ArrowRight className="size-4" />
-            </Button>
-          )}
+          <button
+            type="button"
+            onClick={prev}
+            disabled={index === 0 && step === 0}
+            aria-label="Previous slide"
+            className="rounded-md p-1.5 transition-colors hover:bg-current/10 disabled:opacity-30"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={forward}
+            aria-label={forwardLabel}
+            data-forward
+            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-current/10"
+          >
+            {forwardLabel}
+            <ChevronLeft className="size-4 rotate-180" />
+          </button>
           <button
             type="button"
             onClick={exitPresent}
@@ -242,9 +324,15 @@ export function CasePage({
           </button>
         </header>
 
-        <div className="min-h-0 flex-1" onClick={next} onKeyDown={(e) => e.key === "Enter" && next()}>
+        <div
+          className="min-h-0 flex-1 touch-pan-y"
+          onClick={tapToAdvance}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onKeyDown={(e) => e.key === "Enter" && tapToAdvance()}
+        >
           <Stage fit="contain">
-            <SlideView slide={slide} step={step} onZoom={setZoom} />
+            <SlideView slide={slide} step={step} onImageClick={openImage} />
           </Stage>
         </div>
 
@@ -274,21 +362,22 @@ export function CasePage({
           </span>
         )}
         <div className="ml-auto flex items-center gap-2">
-          {prevHref && (
-            <Button variant="outline" size="sm" onClick={() => (window.location.hash = prevHref)}>
-              <ChevronLeft className="size-4" /> Prev
-            </Button>
-          )}
-          {nextHref && !atEnd && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => (window.location.hash = nextHref)}
-              data-jump-next
-            >
-              Next case <ChevronLeft className="size-4 rotate-180" />
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={prev}
+            disabled={index === 0 && step === 0}
+            aria-label="Previous slide"
+            data-back
+          >
+            <ChevronLeft className="size-4" />
+            <span className="hidden sm:inline">Prev</span>
+          </Button>
+          <Button variant="outline" size="sm" onClick={forward} data-forward aria-label={forwardLabel}>
+            <span className="hidden sm:inline">{forwardLabel}</span>
+            <ChevronLeft className="size-4 rotate-180 sm:hidden" />
+            <ArrowRight className="hidden size-4 sm:inline" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -305,27 +394,20 @@ export function CasePage({
         role="button"
         tabIndex={0}
         aria-label="Next"
-        onClick={next}
+        onClick={tapToAdvance}
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") next();
+          if (e.key === "Enter" || e.key === " ") tapToAdvance();
         }}
-        className="cursor-pointer focus-visible:outline-none"
+        className="cursor-pointer touch-pan-y focus-visible:outline-none"
       >
         <Stage>
-          <SlideView slide={slide} step={step} onZoom={setZoom} />
+          <SlideView slide={slide} step={step} onImageClick={openImage} />
         </Stage>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={prev} disabled={index === 0 && step === 0}>
-            <ArrowLeft className="size-4" />
-          </Button>
-          <Button variant="secondary" size="sm" onClick={forward} data-forward>
-            {forwardLabel} <ArrowRight className="size-4" />
-          </Button>
-        </div>
-
         <div className="text-muted-foreground flex items-center gap-3 text-xs">{stepDots}</div>
 
         {slide.notes && (

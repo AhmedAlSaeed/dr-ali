@@ -87,11 +87,12 @@ const stagger = (i: number) => ({ animationDelay: `${Math.min(i, 8) * STAGGER_MS
 export function SlideView({
   slide,
   step,
-  onZoom,
+  onImageClick,
 }: {
   slide: Slide;
   step: number;
-  onZoom?: (picture: Picture) => void;
+  /** called for a tap/click on a picture — opening it, never advancing the slide */
+  onImageClick?: (picture: Picture) => void;
 }) {
   const theme = slideTheme(slide);
 
@@ -132,7 +133,15 @@ export function SlideView({
         <div
           key={`${slide.pos}-${p.src}-${i}`}
           data-block="picture"
-          className="reveal-shown group absolute"
+          onClick={
+            onImageClick
+              ? (e) => {
+                  e.stopPropagation();       // a click on an image must not advance the slide
+                  onImageClick(p);
+                }
+              : undefined
+          }
+          className={cn("reveal-shown group absolute", onImageClick && "cursor-zoom-in")}
           style={{
             ...stagger(i),
             left: p.x * PX_PER_IN,
@@ -145,17 +154,17 @@ export function SlideView({
             src={`${import.meta.env.BASE_URL}media/${p.src}`}
             alt={p.alt}
             loading="lazy"
-            className="h-full w-full object-contain"
+            className="h-full w-full object-fill"
           />
-          {onZoom && (
+          {onImageClick && (
             <button
               type="button"
               aria-label={`Enlarge image ${i + 1}`}
               onClick={(e) => {
                 e.stopPropagation();
-                onZoom(p);
+                onImageClick(p);
               }}
-              className="absolute right-2 top-2 rounded-md bg-black/55 p-1.5 text-white/90 opacity-0 backdrop-blur transition-opacity hover:bg-black/75 focus-visible:opacity-100 group-hover:opacity-100"
+              className="absolute right-2 top-2 rounded-md bg-black/55 p-1.5 text-white/90 backdrop-blur transition-opacity hover:bg-black/75 focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100"
             >
               <ZoomIn className="size-4" />
             </button>
@@ -201,7 +210,8 @@ export function SlideView({
         const hidden = t.reveal > step;
         const box = boxInSlide(t);
         const boxH = box.h * PX_PER_IN;
-        const basePt = (t.size ?? ROLE_PT[t.role]) * (t.fontScale ?? 1);
+        const blockPt = t.size ?? ROLE_PT[t.role];
+        const fontScale = t.fontScale ?? 1;
         // the deck sets line spacing per level (90%) and a per-level space-before
         const lnReduction = t.lnSpcReduction ?? 0;
 
@@ -226,7 +236,9 @@ export function SlideView({
             <AutoFit boxH={boxH} deps={`${slide.pos}-${i}-${step}`}>
               {(fit) =>
                 t.paras.map((p, pi) => {
-                  const pt = basePt * fit;
+                  // per-level size from the shape's lstStyle ladder, scaled by the deck's
+                  // normAutofit and by the auto-fit pass
+                  const pt = (p.sz ?? blockPt) * fontScale * fit;
                   const bullet = p.bullet === "char" || p.bullet === "num" ? p.bullet : "none";
                   // indentation and hanging indent come from the deck (marL / indent)
                   const pad = (p.marL ?? 0.25 * (p.lvl + 1)) * PX_PER_IN;
@@ -253,7 +265,12 @@ export function SlideView({
                       }}
                     >
                       {bullet !== "none" && (
-                        <span style={{ marginRight: "0.4em" }}>
+                        <span
+                          style={{
+                            marginRight: "0.4em",
+                            color: p.bulletColor ? `#${p.bulletColor}` : theme.muted,
+                          }}
+                        >
                           {numbered ? `${numbered}.` : (p.char || BULLET_FALLBACK[Math.min(p.lvl, 2)])}
                         </span>
                       )}
@@ -266,7 +283,9 @@ export function SlideView({
                             style={{
                               fontWeight: r.b ? 700 : undefined,
                               fontStyle: r.i ? "italic" : undefined,
-                              fontSize: r.sz ? Math.round(r.sz * fit * (PX_PER_IN / 72) * 10) / 10 : undefined,
+                              fontSize: r.sz
+                                ? Math.round(r.sz * fontScale * fit * (PX_PER_IN / 72) * 10) / 10
+                                : undefined,
                               color: r.color ? `#${r.color}` : undefined,
                             }}
                           >

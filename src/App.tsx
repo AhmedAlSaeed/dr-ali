@@ -54,7 +54,8 @@ export default function App() {
     }
     return (
       <CasePage
-        key={`case-${entry.n}`}
+        /* no key: remounting would drop the fullscreen element and exit present mode.
+           CasePage resets its own position when the case changes. */
         deck={deck}
         cases={deck.cases}
         positions={entry.slides}

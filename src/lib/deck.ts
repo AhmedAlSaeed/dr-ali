@@ -22,6 +22,10 @@ export type Para = {
   /** line spacing as a fraction of single spacing (deck default 0.9) and space-before in points */
   lnSpcPct?: number | null;
   spcBefPt?: number | null;
+  /** the size for this level, from the shape's own lstStyle ladder (28pt level 1, 24pt level 2 …) */
+  sz?: number | null;
+  /** bullet colour declared by the deck */
+  bulletColor?: string | null;
 };
 
 export type TextBlock = {

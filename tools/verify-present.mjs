@@ -71,6 +71,34 @@ ok("slide fills the fullscreen space", presentState.fills,
    `canvas ${presentState.canvasH}px of ${presentState.viewportH}px viewport (scale ${presentState.canvasScale})`);
 await page.screenshot({ path: `${OUT}/site-present.png` });
 
+// ---- fullscreen must survive moving to the next case ----
+// leave any presentation first: navigating away while fullscreen makes Chrome refuse the next
+// fullscreen request, and navigate by hash so the document (and its state) is kept
+await page.keyboard.press("Escape");
+await settle(600);
+await page.evaluate(() => (window.location.hash = "#/c/1"));
+await settle(1000);
+await page.keyboard.press("f");
+await settle(900);
+const inFs = () => page.evaluate(() => !!document.fullscreenElement && !!document.querySelector(".fixed.inset-0"));
+ok("present mode is active", await inFs());
+
+let label = "";
+for (let i = 0; i < 30 && label !== "Next case"; i++) {
+  await page.click("[data-forward]");
+  await settle(200);
+  label = await page.$eval("[data-forward]", (e) => (e.textContent ?? "").trim());
+}
+ok("reached the end of case 1 in presentation", label === "Next case", label);
+await page.click("[data-forward]");
+await settle(1000);
+const stillPresent = await inFs();
+const where = await page.evaluate(() => location.hash);
+ok("moving to the next case keeps fullscreen and present mode",
+   stillPresent && where === "#/c/2", `${where}, fullscreen=${stillPresent}`);
+ok("and it opened the next case at its first slide",
+   (await page.$eval("[data-slide-index]", (e) => e.getAttribute("data-slide-index"))) === "0");
+
 // Esc leaves fullscreen but stays on the slide; a second Esc goes to the index
 await page.keyboard.press("Escape");
 await settle(500);

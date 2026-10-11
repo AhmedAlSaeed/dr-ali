@@ -350,6 +350,66 @@ def master_text_styles(z: zipfile.ZipFile) -> dict[str, dict]:
     return out
 
 
+def _level_info(block: str, scheme: dict[str, str] | None = None,
+                cmap: dict[str, str] | None = None) -> dict:
+    """Parse one <a:lvlNpPr> into the attributes that matter for rendering."""
+    info: dict = {}
+    sz = re.search(r'<a:defRPr[^>]*sz="(\d+)"', block) or re.search(r'sz="(\d+)"', block)
+    if sz:
+        info["sz"] = int(sz.group(1)) / 100
+    algn = re.search(r'algn="(\w+)"', block)
+    if algn:
+        info["algn"] = algn.group(1)
+    mar = re.search(r'marL="(-?\d+)"', block)
+    ind = re.search(r'indent="(-?\d+)"', block)
+    if mar:
+        info["marL"] = round(int(mar.group(1)) / EMU_IN, 3)
+    if ind:
+        info["indent"] = round(int(ind.group(1)) / EMU_IN, 3)
+    bc = re.search(r'<a:buChar char="([^"]*)"', block)
+    if bc:
+        info["bullet"], info["char"] = "char", unescape(bc.group(1))
+    elif "<a:buAutoNum" in block:
+        info["bullet"] = "num"
+    elif "<a:buNone" in block:
+        info["bullet"] = "none"
+    pct = re.search(r'<a:spcPct val="(\d+)"', block)
+    if pct:
+        info["lnSpcPct"] = int(pct.group(1)) / 100000
+    bef = re.search(r'<a:spcBef>\s*<a:spcPts val="(\d+)"', block)
+    if bef:
+        info["spcBefPt"] = int(bef.group(1)) / 100
+    clr = re.search(r"<a:buClr>(.*?)</a:buClr>", block, re.S)
+    if clr:
+        rgb = re.search(r'<a:srgbClr val="([0-9A-Fa-f]{6})"', clr.group(1))
+        sch = re.search(r'<a:schemeClr val="(\w+)"', clr.group(1))
+        if rgb:
+            info["bulletColor"] = rgb.group(1).upper()
+        elif sch and scheme:
+            info["bulletColor"] = scheme.get((cmap or {}).get(sch.group(1), sch.group(1)))
+    return info
+
+
+def _shape_levels(node: str, scheme=None, cmap=None) -> dict[int, dict]:
+    """A shape's own <a:lstStyle>: the level ladder for plain text boxes.
+
+    Most content in this deck is plain text boxes rather than placeholders, and their bullets,
+    sizes and indents live here — ignoring it produced bullet-less, undersized text.
+    """
+    out: dict[int, dict] = {}
+    ls = re.search(r"<a:lstStyle>(.*?)</a:lstStyle>", node, re.S)
+    if not ls:
+        return out
+    for lvl in range(1, 10):
+        blk = re.search(rf"<a:lvl{lvl}pPr.*?</a:lvl{lvl}pPr>|<a:lvl{lvl}pPr[^>]*/>", ls.group(1), re.S)
+        if not blk:
+            continue
+        info = _level_info(blk.group(0), scheme, cmap)
+        if info:
+            out[lvl - 1] = info
+    return out
+
+
 def _placeholder_map(xml: str) -> dict[str, dict]:
     """placeholder signature -> {sz, x, y, w, h} for one layout or master part."""
     out: dict[str, dict] = {}
@@ -377,32 +437,7 @@ def _placeholder_map(xml: str) -> dict[str, dict]:
             blk = re.search(rf"<a:lvl{lvl}pPr.*?</a:lvl{lvl}pPr>", node, re.S)
             if not blk:
                 continue
-            t = blk.group(0)
-            lv: dict = {}
-            if "<a:buNone" in t:
-                lv["bullet"] = "none"
-            elif "<a:buAutoNum" in t:
-                lv["bullet"] = "num"
-            elif "<a:buChar" in t:
-                lv["bullet"] = "char"
-                bc = re.search(r'<a:buChar char="([^"]*)"', t)
-                if bc:
-                    lv["char"] = unescape(bc.group(1))
-            algn = re.search(r'algn="(\w+)"', t)
-            if algn:
-                lv["algn"] = algn.group(1)
-            mar = re.search(r'marL="(-?\d+)"', t)
-            ind = re.search(r'indent="(-?\d+)"', t)
-            if mar:
-                lv["marL"] = round(int(mar.group(1)) / EMU_IN, 3)
-            if ind:
-                lv["indent"] = round(int(ind.group(1)) / EMU_IN, 3)
-            pct = re.search(r'<a:spcPct val="(\d+)"', t)
-            if pct:
-                lv["lnSpcPct"] = int(pct.group(1)) / 100000
-            bef = re.search(r'<a:spcBef>\s*<a:spcPts val="(\d+)"', t)
-            if bef:
-                lv["spcBefPt"] = int(bef.group(1)) / 100
+            lv = _level_info(blk.group(0))
             if lv:
                 bl[lvl - 1] = lv
         if bl:
@@ -484,13 +519,20 @@ GRID_MARGIN = 0.05          # inches kept clear of the slide edge
 GRID_GAP = 0.08             # inches between images in a row / between rows
 
 
-def _label_band(slide: dict, top: float, bottom: float) -> tuple[float, float]:
-    """Horizontal band a grid may use without covering text that shares its rows.
+def _label_band(slide: dict, top: float, bottom: float, pics: list[dict]) -> tuple[float, float]:
+    """Horizontal band a grid may use without covering text.
 
-    Uses each block's *rotated* bounding box, so the vertical row labels on the image grids
-    (rot 270) are measured where they actually appear.
+    Two cases matter here:
+      * a text column beside the pictures (case 6's diagnosis slide: text left, images right) —
+        the grid must stay in its own column rather than being centred across the whole slide;
+      * a narrow rotated row label at the edge of a full-width grid (case 8), measured by its
+        rotated bounding box.
+    A caption that merely clips the top of the pictures is not "beside" them, so a block has to
+    overlap the picture band vertically by at least half its own height to count.
     """
-    left, right = 0.0, SLIDE_W
+    pic_x0 = min(p["x"] for p in pics)
+    pic_x1 = max(p["x"] + p["w"] for p in pics)
+    left, right = GRID_MARGIN, SLIDE_W - GRID_MARGIN
     for t in slide["texts"]:
         w, h = t["w"], t["h"]
         if w <= 0 or h <= 0:
@@ -499,13 +541,20 @@ def _label_band(slide: dict, top: float, bottom: float) -> tuple[float, float]:
         c, sn = abs(math.cos(rad)), abs(math.sin(rad))
         bw, bh = w * c + h * sn, w * sn + h * c
         cx, cy = t["x"] + w / 2, t["y"] + h / 2
-        if cy + bh / 2 < top or cy - bh / 2 > bottom:
-            continue                                  # shares no rows with the grid
+        overlap = min(cy + bh / 2, bottom) - max(cy - bh / 2, top)
+        if overlap < 0.5 * bh:
+            continue
         x0, x1 = cx - bw / 2, cx + bw / 2
-        if x1 <= SLIDE_W / 3:
-            left = max(left, x1)
-        elif x0 >= 2 * SLIDE_W / 3:
-            right = min(right, x0)
+        if x1 <= pic_x0 + 0.15:                        # sits beside the pictures, to the left
+            left = max(left, x1 + GRID_GAP)
+        elif x0 >= pic_x1 - 0.15:                      # beside them, to the right
+            right = min(right, x0 - GRID_GAP)
+        elif bw <= 2.0 and x1 <= SLIDE_W / 3:           # narrow edge label, left
+            left = max(left, x1 + GRID_GAP)
+        elif bw <= 2.0 and x0 >= 2 * SLIDE_W / 3:       # narrow edge label, right
+            right = min(right, x0 - GRID_GAP)
+    if right - left < 2.0:                             # never squeeze the grid to nothing
+        return GRID_MARGIN, SLIDE_W - GRID_MARGIN
     return left, right
 
 
@@ -559,9 +608,7 @@ def normalise_grids(slide: dict) -> bool:
     total_h = sum(row_h) + GRID_GAP * (len(rows) - 1)
     # stay clear of row labels that sit beside the grid
     band_l, band_r = _label_band(slide, min(p["y"] for p in pics),
-                                 max(p["y"] + p["h"] for p in pics))
-    band_l += GRID_GAP
-    band_r -= GRID_GAP
+                                 max(p["y"] + p["h"] for p in pics), pics)
     avail_w, avail_h = max(2.0, band_r - band_l), SLIDE_H - 2 * GRID_MARGIN
     scale = min(1.0, avail_w / total_w, avail_h / total_h)
     col_w = [w * scale for w in col_w]
@@ -611,6 +658,11 @@ def main() -> None:
                 xfrm = re.search(r'<a:off x="(-?\d+)" y="(-?\d+)"/><a:ext cx="(\d+)" cy="(\d+)"/>', node)
 
                 if m.group(1) == "pic":
+                    sr = re.search(r'<a:srcRect([^>]*)/>', node)
+                    crop = (0.0, 0.0, 0.0, 0.0)
+                    if sr:
+                        cv = {k: int(v) / 100000 for k, v in re.findall(r'(\w)="(-?\d+)"', sr.group(1))}
+                        crop = (cv.get("l", 0.0), cv.get("t", 0.0), cv.get("r", 0.0), cv.get("b", 0.0))
                     blip = re.search(r'r:embed="(rId\d+)"', node)
                     part = imgs.get(blip.group(1)) if blip else None
                     if not part:
@@ -626,7 +678,7 @@ def main() -> None:
                     pictures.append({
                         "src": part, "alt": unescape(alt.group(1)) if alt else "",
                         "x": box[0], "y": box[1], "w": box[2], "h": box[3],
-                        "grouped": spid in grouped,
+                        "crop": crop, "grouped": spid in grouped,
                     })
                     continue
 
@@ -699,9 +751,10 @@ def main() -> None:
                              else "other")
                 style = styles.get(style_key, {})
                 lvls = inherited.get("levels") or {}
+                own = _shape_levels(node, scheme, cmap)      # this shape's own level ladder
                 for pa in paras:
                     lvl = pa["lvl"]
-                    chain = [lvls.get(lvl) or {}, style.get(lvl) or {}]
+                    chain = [own.get(lvl) or {}, lvls.get(lvl) or {}, style.get(lvl) or {}]
                     if pa["bullet"] is None:
                         for src in chain:
                             if "bullet" in src:
@@ -729,7 +782,13 @@ def main() -> None:
                         pa["lnSpcPct"] = next((s_["lnSpcPct"] for s_ in chain if "lnSpcPct" in s_), 1.0)
                     if pa.get("spcBefPt") is None:
                         pa["spcBefPt"] = next((s_["spcBefPt"] for s_ in chain if "spcBefPt" in s_), 0.0)
-                title_sz = (style.get(0) or {}).get("sz")
+                    if pa.get("bulletColor") is None:
+                        pa["bulletColor"] = next((s_["bulletColor"] for s_ in chain
+                                                  if s_.get("bulletColor")), None)
+                    if pa.get("sz") is None:
+                        # the level ladder: 28pt level 1, 24pt level 2, … in this deck
+                        pa["sz"] = next((s_["sz"] for s_ in chain if "sz" in s_), None)
+                title_sz = (own.get(0) or {}).get("sz") or (style.get(0) or {}).get("sz")
                 sizes = [r["sz"] for p in paras for r in p["runs"] if r.get("sz")]
                 texts.append({
                     "role": role, "name": clean_name(name), "ph": ph.group(0) if ph else None,
@@ -823,23 +882,46 @@ def main() -> None:
                                                       ("bg1", "lt1") else "dark") if bg_scheme else None),
             })
 
-        # ---- media, resized for the web ----
-        used = sorted({p["src"] for s in slides for p in s["pictures"]})
-        for part in used:
-            raw = z.read(part)
-            name = Path(part).stem + ".webp"
+        # ---- media: crop as the deck crops, then resize for the web ----
+        # PowerPoint draws only the <a:srcRect> region of a picture inside its frame, so the crop
+        # is baked into the file we serve: the browser gets the final pixels and no CSS cropping.
+        import hashlib
+        import io
+
+        def bake_name(part: str, crop: tuple) -> str:
+            stem = Path(part).stem
+            if not any(crop):
+                return f"{stem}.webp"
+            tag = hashlib.sha1(",".join(f"{c:.4f}" for c in crop).encode()).hexdigest()[:6]
+            return f"{stem}-{tag}.webp"
+
+        for old in (OUT / "media").glob("*.webp"):
+            old.unlink()                      # regenerate from scratch so no stale crop lingers
+
+        wanted: dict[tuple[str, tuple], str] = {}
+        for sl in slides:
+            for pic in sl["pictures"]:
+                crop = tuple(pic.get("crop") or (0.0, 0.0, 0.0, 0.0))
+                wanted[(pic["src"], crop)] = bake_name(pic["src"], crop)
+
+        for (part, crop), name in wanted.items():
             dest = OUT / "media" / name
-            if not dest.exists():
-                import io
-                with Image.open(io.BytesIO(raw)) as im:
-                    im = im.convert("RGB")
-                    if max(im.size) > MAX_PX:
-                        im.thumbnail((MAX_PX, MAX_PX), Image.LANCZOS)
-                    im.save(dest, "WEBP", quality=QUALITY, method=5)
-            media_index[name] = {"part": part, "bytes": dest.stat().st_size}
-        for s in slides:
-            for p in s["pictures"]:
-                p["src"] = Path(p["src"]).stem + ".webp"
+            with Image.open(io.BytesIO(z.read(part))) as im:
+                im = im.convert("RGB")
+                if any(crop):
+                    w, h = im.size
+                    box = (round(w * crop[0]), round(h * crop[1]),
+                           round(w * (1 - crop[2])), round(h * (1 - crop[3])))
+                    if box[2] > box[0] and box[3] > box[1]:
+                        im = im.crop(box)
+                if max(im.size) > MAX_PX:
+                    im.thumbnail((MAX_PX, MAX_PX), Image.LANCZOS)
+                im.save(dest, "WEBP", quality=QUALITY, method=5)
+            media_index[name] = {"part": part, "crop": list(crop), "bytes": dest.stat().st_size}
+        for sl in slides:
+            for pic in sl["pictures"]:
+                crop = tuple(pic.get("crop") or (0.0, 0.0, 0.0, 0.0))
+                pic["src"] = wanted[(pic["src"], crop)]
 
     grids = sum(1 for sl in slides if normalise_grids(sl))
     if grids:
@@ -946,8 +1028,9 @@ def main() -> None:
     print(f"slides          : {len(slides)}")
     print(f"cases           : {len(cases)}  -> sizes {[len(c['slides']) for c in cases]}")
     print(f"index slide     : {idx_pos} (skipped in the site's own index)")
+    cropped = sum(1 for v in media_index.values() if any(v.get("crop") or []))
     print(f"images          : {len(media_index)} webp, {total/1e6:.1f} MB "
-          f"(was {sum(z.getinfo(p).file_size for p in used)/1e6:.1f} MB)")
+          f"({cropped} with the deck's crop baked in)")
     print(f"reveal steps    : {sum(len(s['reveal']) for s in slides)} across "
           f"{sum(1 for s in slides if s['reveal'])} slides")
     print(f"notes           : {sum(1 for s in slides if s['notes'])}")

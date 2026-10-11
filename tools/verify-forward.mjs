@@ -10,16 +10,16 @@ const label = () => p.$eval("[data-forward]", (e) => (e.textContent ?? "").trim(
 const clickForward = () => p.click("[data-forward]");
 const hash = () => p.evaluate(() => location.hash);
 const slideIndex = () => p.$eval("[data-slide-index]", (e) => e.getAttribute("data-slide-index"));
-const jumpNextVisible = async () => !!(await p.$("[data-jump-next]"));
+const hasCaseMenu = async () => !!(await p.$('button[aria-haspopup="listbox"]'));
 
 await p.goto(`${BASE}/#/c/3`, { waitUntil: "networkidle0" });
 await settle(1100);
-ok("mid-case the primary control says Next", (await label()) === "Next", await label());
-ok("mid-case the header still offers a jump to the next case", await jumpNextVisible());
+ok("mid-case the header control says Next", (await label()) === "Next", await label());
+ok("the header keeps the case menu for jumping between cases", await hasCaseMenu());
 
 for (let i = 0; i < 14; i++) { await p.keyboard.press("ArrowRight"); await settle(130); }
 ok("at the end it says Next case", (await label()) === "Next case", await label());
-ok("and the header jump button is gone (no duplicate)", !(await jumpNextVisible()));
+ok("and the forward control is the only Next case affordance", (await p.$$('[data-forward]')).length === 1);
 
 await clickForward();
 await settle(800);

@@ -51,10 +51,16 @@ ranges and slide counts are not shown anywhere.
 - a case is marked complete **the moment its last slide is displayed**, and the index then
   reveals its diagnosis. Stored in `localStorage`; resume/reset on the index.
 
-**Present mode** (`f`, or the ⤢ button) — real fullscreen on a dedicated element, the slide
-scaled to fill the whole space, and a **minimal header whose background matches the slide** with a
-bottom border: case dropdown and exit, nothing else. `esc` leaves fullscreen first, a second
-`esc` returns to the index.
+**Present mode** (`f`, or the ⤢ button) — real fullscreen, the slide scaled to fill the whole
+space, and a **minimal header whose background matches the slide** with a bottom border: case
+dropdown, prev/next, exit. Fullscreen is requested on `<html>` synchronously from the gesture, so
+**presentation continues when you move to the next case** (the overlay is not the fullscreen
+element, and the case component is not remounted). Where the API is missing — iOS Safari has no
+`Element.requestFullscreen` — the overlay alone fills the viewport, using `dvh`. `esc` leaves
+fullscreen first, a second `esc` returns to the index.
+
+**Touch** — swiping horizontally moves between slides (a vertical drag still scrolls), and tapping
+an image opens it rather than advancing.
 
 ## Keyboard (presenting)
 
@@ -98,9 +104,13 @@ Two more normalisations the deck needed:
 - **Grouped shapes.** 47 images across 12 slides sit inside `<p:grpSp>` groups, whose child
   coordinates are not slide coordinates. The extractor composes the group transform (nested
   groups included) — without it, a grid's second row landed on top of its first.
+- **Image crops.** PowerPoint draws only the `<a:srcRect>` region of a picture inside its frame —
+  72 of the deck's pictures are cropped that way. The crop is **baked into the extracted WebP**
+  (not applied with CSS), and the picture then fills its frame exactly as the deck does, so aspect
+  ratios come out right (median frame-vs-file mismatch 0.03%).
 - **Image grids.** On 16 slides the grids are rebuilt: rows share a top and height, columns share
   x positions across rows, gaps are uniform (0.08in), the block is centred and scaled to fit
-  inside the slide.
+  inside the slide, and it stays clear of text beside it (case 6 keeps text left, images right).
 - **Rotated text** (`rot="270deg"` row labels) is rendered rotated, placed by its rotated bounding
   box.
 
@@ -129,7 +139,9 @@ tools/deck-meta.json      conference identity + Conflict of Interest / Accredita
 tools/audit-slides.mjs    every slide: text overflow / outside-slide check
 tools/verify-site.mjs     behaviour: index, spoilers, reveal, images, completion, counter
 tools/verify-animation.mjs  one animation system; the deck's click-step still gates content
-tools/verify-present.mjs  case switching resets, fullscreen, header, slide fills the space
+tools/verify-present.mjs  case switching resets, fullscreen, header, fills the space, continuity
+tools/verify-forward.mjs  the forward control's label and destination at each point of a case
+tools/verify-mobile.mjs   touch: no Fullscreen API, image taps, header nav, swipe
 tools/compare-with-deck.mjs  screenshots a slide for side-by-side comparison with the deck PDF
 src/lib/deck.ts           types + helpers
 src/lib/progress.ts       completion state (localStorage)
