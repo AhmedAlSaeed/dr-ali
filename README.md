@@ -103,6 +103,19 @@ Two more normalisations the deck needed:
 `tools/audit-slides.mjs` asserts nothing escapes its box or the slide: currently **0 problems
 across all 78 slides**.
 
+## Deploy
+
+`.github/workflows/deploy-pages.yml` builds and deploys to GitHub Pages on every push to `main`
+(typecheck → build → upload). Enable it once with **Settings → Pages → Source: GitHub Actions**;
+the URL is then `https://<user>.github.io/<repo>/`.
+
+It works as a *project* page (served from `/<repo>/`, not the domain root) because routing is
+hash-based and assets are referenced relatively — no SPA 404 rewrite is needed. No deck is needed
+in CI: `public/content.json` and `public/media/` are committed.
+
+Note GitHub Pages serves **public** repositories on the free plan; a private repo needs a paid
+plan. For a private repo, Cloudflare Pages (or Netlify/Vercel) builds the same `dist/` for free.
+
 ## Layout
 
 ```
