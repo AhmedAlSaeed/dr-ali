@@ -259,6 +259,35 @@ export function CasePage({
     </span>
   );
 
+  /** Progress pills: one per slide in the case, filled up to where you are; click to jump.
+   *  The inline view puts them below the slide, present mode in the header so the presenter
+   *  can see at a glance how far into the case they are. */
+  const slidePills = (tone: "page" | "slide") => (
+    <div className="flex flex-wrap items-center gap-1.5" data-slide-pills>
+      {positions.map((p, i) => (
+        <button
+          key={p}
+          data-slide-nav={i}
+          data-pill={i}
+          data-filled={i <= index}
+          aria-label={`Go to position ${i + 1}`}
+          title={`Slide ${i + 1}`}
+          onClick={() => goTo(i)}
+          className={cn(
+            "h-2 w-7 rounded-full transition-colors",
+            i === index
+              ? "bg-brand"
+              : i < index
+                ? "bg-brand/45 hover:bg-brand/70"
+                : tone === "slide"
+                  ? "bg-current/20 hover:bg-current/40"
+                  : "bg-muted-foreground/20 hover:bg-muted-foreground/40",
+          )}
+        />
+      ))}
+    </div>
+  );
+
   // ============================ present mode ================================
   if (present) {
     return (
@@ -290,7 +319,10 @@ export function CasePage({
           {caseN && done && (
             <span className="text-xs opacity-60">{entry?.diagnosis}</span>
           )}
-          <span className="ml-auto flex items-center gap-3 text-xs opacity-70">{stepDots}</span>
+          <span className="ml-auto flex min-w-0 items-center gap-3 text-xs opacity-70">
+            {slidePills("slide")}
+            {stepDots}
+          </span>
           <button
             type="button"
             onClick={prev}
@@ -424,26 +456,8 @@ export function CasePage({
         )}
 
         {/* progress as pills: one per slide, filled up to where you are. click to jump */}
-        <div className="ml-auto flex flex-wrap items-center gap-1.5" data-slide-index={index}>
-          {positions.map((p, i) => (
-            <button
-              key={p}
-              data-slide-nav={i}
-              data-pill={i}
-              data-filled={i <= index}
-              aria-label={`Go to position ${i + 1}`}
-              title={`Slide ${i + 1}`}
-              onClick={() => goTo(i)}
-              className={cn(
-                "h-2 w-7 rounded-full transition-colors",
-                i === index
-                  ? "bg-brand"
-                  : i < index
-                    ? "bg-brand/45 hover:bg-brand/70"
-                    : "bg-muted-foreground/20 hover:bg-muted-foreground/40",
-              )}
-            />
-          ))}
+        <div className="ml-auto flex flex-wrap items-center gap-1.5 text-xs" data-slide-index={index}>
+          {slidePills("page")}
         </div>
       </div>
 

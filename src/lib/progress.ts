@@ -7,6 +7,8 @@ export type Progress = {
   done: Record<number, boolean>;
   /** where the presenter left off */
   last?: { caseN: number; index: number };
+  /** disclosures are shown on the index only until they have been seen once */
+  disclosuresSeen?: boolean;
 };
 
 const empty: Progress = { done: {} };
@@ -16,7 +18,7 @@ function read(): Progress {
     const raw = localStorage.getItem(KEY);
     if (!raw) return empty;
     const parsed = JSON.parse(raw) as Progress;
-    return { done: parsed.done ?? {}, last: parsed.last };
+    return { done: parsed.done ?? {}, last: parsed.last, disclosuresSeen: parsed.disclosuresSeen };
   } catch {
     return empty;
   }
@@ -56,8 +58,13 @@ export function useProgress() {
     [save],
   );
 
+  const markDisclosuresSeen = useCallback(
+    () => save({ ...read(), disclosuresSeen: true }),
+    [save],
+  );
+
   const reset = useCallback(() => save(empty), [save]);
 
   const count = Object.values(state.done).filter(Boolean).length;
-  return { ...state, count, setDone, toggle, setLast, reset };
+  return { ...state, count, setDone, toggle, setLast, markDisclosuresSeen, reset };
 }

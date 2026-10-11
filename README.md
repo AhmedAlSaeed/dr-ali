@@ -39,7 +39,8 @@ ranges and slide counts are not shown anywhere.
 - no vignettes or other case content on the index — the case itself is where the content lives
 - **Accreditation & disclosures** sits **above the case list**: the deck's Conflict of Interest
   and Accreditation slides re-authored as web content (not screenshots), from
-  `tools/deck-meta.json`
+  `tools/deck-meta.json`. Shown once per device — after the first index view it is tucked
+  away (reset clears it along with progress)
 
 **Case view** — the slides, plus:
 

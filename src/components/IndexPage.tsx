@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Disclosures } from "@/components/Disclosures";
@@ -11,6 +12,13 @@ export function IndexPage({ deck }: { deck: Deck }) {
   const total = deck.cases.length;
   const last = progress.last;
   const lastCase = last ? deck.cases.find((c) => c.n === last.caseN) : undefined;
+
+  // disclosures are worth reading once: show them for the first visit, then tuck them away
+  const [showDisclosures] = useState(() => !progress.disclosuresSeen);
+  const markDisclosuresSeen = progress.markDisclosuresSeen;
+  useEffect(() => {
+    if (showDisclosures) markDisclosuresSeen();
+  }, [showDisclosures, markDisclosuresSeen]);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10 md:py-14">
@@ -59,13 +67,15 @@ export function IndexPage({ deck }: { deck: Deck }) {
         </div>
       )}
 
-      <div className="mt-10">
-        <Disclosures
-          coi={deck.conflictOfInterest}
-          accreditation={deck.accreditation}
-          providedBy={deck.conference?.providedBy}
-        />
-      </div>
+      {showDisclosures && (
+        <div className="mt-10">
+          <Disclosures
+            coi={deck.conflictOfInterest}
+            accreditation={deck.accreditation}
+            providedBy={deck.conference?.providedBy}
+          />
+        </div>
+      )}
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {deck.cases.map((c) => {
