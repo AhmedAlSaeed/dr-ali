@@ -36,11 +36,11 @@ await settle(400);
 let casePills = await pills("[data-pill]");
 ok("the pills track the slide you are on", casePills.total === total && casePills.filled === total,
    JSON.stringify(casePills));
-// advance until the case is finished (the forward control turns into "Next case"): pressing
-// further would move on to the next case, which is a different progress bar
+// advance until the case is finished (the forward control turns into "Back to index"): pressing
+// further would leave the case for the index, which is a different progress bar
 for (let i = 0; i < 12; i++) {
   const label = await p.$eval("[data-forward]", (e) => e.getAttribute("aria-label") ?? "");
-  if (label === "Next case") break;
+  if (label === "Back to index") break;
   await p.keyboard.press("ArrowRight");
   await settle(250);
 }

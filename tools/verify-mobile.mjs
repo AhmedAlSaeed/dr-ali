@@ -58,7 +58,7 @@ await p.keyboard.press("Escape");
 await settle(500);
 ok("escape closes it", !(await p.$('[role="dialog"]')));
 
-// header nav is slide-wise, and continues to the next case from the last slide
+// header nav is slide-wise, and the end of the case goes back to the index
 await p.evaluate(() => (window.location.hash = "#/c/3"));
 await settle(900);
 const step = async () => { await click("[data-forward]"); await settle(420); };
@@ -78,24 +78,29 @@ await settle(420);
 ok("header Prev goes back to the previous slide", (await slideIndex()) < afterNext, `-> ${await slideIndex()}`);
 
 let label = await forwardLabel();
-for (let i = 0; i < 30 && label !== "Next case"; i++) { await step(); label = await forwardLabel(); }
-ok("at the end of the case the header offers Next case", label === "Next case", label);
+for (let i = 0; i < 30 && label !== "Back to index"; i++) { await step(); label = await forwardLabel(); }
+ok("at the end of the case the header offers Back to index", label === "Back to index", label);
 
-// tapping the slide on the last slide continues to the next case, like the button
+// tapping the slide on the last slide returns to the main page, like the button
 await p.evaluate(() => document.querySelector('[role="button"][aria-label="Next"]')?.click());
 await settle(900);
-ok("tapping the slide on the last slide opens the next case",
-   (await hash()) === "#/c/4" && (await slideIndex()) === 0, `${await hash()} index ${await slideIndex()}`);
+ok("tapping the slide on the last slide returns to the index",
+   (await hash()) === "#/", `${await hash()}`);
 
-// and so does swiping past it
+// and so does swiping past it. from a fresh case: its end has to be reached again
+await p.evaluate(() => (window.location.hash = "#/c/4"));
+await settle(900);
 let guard = 0;
-while ((await forwardLabel()) !== "Next case" && guard++ < 30) await step();
+while ((await forwardLabel()) !== "Back to index" && guard++ < 30) await step();
 await swipe(-180);
 await settle(900);
-ok("swiping past the last slide opens the next case",
-   (await hash()) === "#/c/5" && (await slideIndex()) === 0, `${await hash()} index ${await slideIndex()}`);
+ok("swiping past the last slide returns to the index",
+   (await hash()) === "#/", `${await hash()}`);
 
 // ---- swipe ----
+// a different case, so the swipe starts from a case view again
+await p.evaluate(() => (window.location.hash = "#/c/5"));
+await settle(900);
 // a swipe also consumes any pending reveal first, so clear those before measuring
 for (let i = 0; i < 4 && (await p.$$eval(".reveal-hidden", (e) => e.length)) > 0; i++) {
   await click("[data-forward]");

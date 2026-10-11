@@ -20,31 +20,44 @@ await settle(1100);
 ok("mid-case the header control says Next", (await label()) === "Next", await label());
 ok("the header keeps the case menu for jumping between cases", await hasCaseMenu());
 
-// press until the case is finished: one more press would move into the next case
+// press until the case is finished: the forward control becomes the way out
 let endLabel = "";
 for (let i = 0; i < 30; i++) {
   endLabel = await label();
-  if (endLabel === "Next case") break;
+  if (endLabel === "Back to index") break;
   await p.keyboard.press("ArrowRight");
   await settle(140);
 }
-ok("at the end it says Next case", endLabel === "Next case", endLabel);
-ok("and the forward control is the only Next case affordance", (await p.$$('[data-forward]')).length === 1);
+ok("at the end it says Back to index", endLabel === "Back to index", endLabel);
+ok("and the forward control is the only end-of-case affordance", (await p.$$('[data-forward]')).length === 1);
 
 await clickForward();
 await settle(800);
-ok("clicking it opens the next case at its first slide",
+ok("clicking it returns to the index",
+   (await hash()) === "#/" && !(await hasCaseMenu()),
+   await hash());
+
+// `n` is the deliberate way to continue to the next case at the end
+await p.goto(`${BASE}/#/c/3`, { waitUntil: "networkidle0" });
+await settle(900);
+for (let i = 0; i < 30; i++) {
+  if ((await label()) === "Back to index") break;
+  await p.keyboard.press("ArrowRight");
+  await settle(140);
+}
+await p.keyboard.press("n");
+await settle(800);
+ok("n still moves on to the next case at the end",
    (await hash()) === "#/c/4" && (await slideIndex()) === "0",
    `${await hash()} slide index ${await slideIndex()}`);
 
-// the last case has nowhere to go next
+// the last case behaves the same way (there is simply nowhere further to go)
 await p.goto(`${BASE}/#/c/12`, { waitUntil: "networkidle0" });
 await settle(900);
-// walk to the end of the last case: further presses would leave it, so stop at the last slide
 let lastLabel = "";
 for (let i = 0; i < 30; i++) {
   lastLabel = await label();
-  if (lastLabel === "Back to index" || lastLabel === "Next case") break;
+  if (lastLabel === "Back to index") break;
   await p.keyboard.press("ArrowRight");
   await settle(140);
 }

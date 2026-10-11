@@ -3,7 +3,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  ChevronsRight,
   CornerDownLeft,
   Info,
   LayoutGrid,
@@ -80,17 +79,21 @@ export function CasePage({
   }, [step, index, positions, deck]);
 
   // The single forward action used by the button, by tapping the slide and by swiping: advance
-  // while the case has slides left, then continue into the next case (or back to the index after
-  // the last one).
-  const forwardLabel = atEnd ? (nextHref ? "Next case" : "Back to index") : "Next";
+  // while the case has slides left, then finish the case by returning to the main page — a case
+  // never runs into the next one on its own (`n` is the deliberate way to keep going).
+  const forwardLabel = atEnd ? "Back to index" : "Next";
   const forward = useCallback(() => {
     if (!atEnd) {
       next();
       return;
     }
-    if (nextHref) window.location.hash = nextHref;
-    else onExit();
-  }, [atEnd, next, nextHref, onExit]);
+    // the case is finished: leave presentation, then land on the index
+    setPresent(false);
+    if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+      document.exitFullscreen().catch(() => {});
+    }
+    onExit();
+  }, [atEnd, next, onExit]);
 
   const goTo = useCallback((i: number) => {
     setIndex(i);
@@ -339,13 +342,7 @@ export function CasePage({
             data-forward
             className="rounded-md p-1.5 transition-colors hover:bg-current/10"
           >
-            {!atEnd ? (
-              <ChevronRight className="size-4" />
-            ) : nextHref ? (
-              <ChevronsRight className="size-4" />
-            ) : (
-              <LayoutGrid className="size-4" />
-            )}
+            {!atEnd ? <ChevronRight className="size-4" /> : <LayoutGrid className="size-4" />}
           </button>
           <button
             type="button"
@@ -406,16 +403,10 @@ export function CasePage({
           >
             <ChevronLeft className="size-4" />
           </Button>
-          {/* arrows only: a single chevron advances, a double one moves to the next case,
-              and the index icon appears after the last case */}
+          {/* arrows only: a single chevron advances, the index icon appears once the case is
+              finished and takes you back to the main page */}
           <Button variant="outline" size="icon" onClick={forward} data-forward aria-label={forwardLabel}>
-            {!atEnd ? (
-              <ChevronRight className="size-4" />
-            ) : nextHref ? (
-              <ChevronsRight className="size-4" />
-            ) : (
-              <LayoutGrid className="size-4" />
-            )}
+            {!atEnd ? <ChevronRight className="size-4" /> : <LayoutGrid className="size-4" />}
           </Button>
           <Button
             variant="ghost"

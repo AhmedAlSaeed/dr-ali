@@ -45,8 +45,9 @@ ranges and slide counts are not shown anywhere.
 **Case view** — the slides, plus:
 
 - a **case dropdown in the header**, so you can jump between cases without going back to the index
-- the primary control follows the case: **Next** while slides remain, then **Next case** at the end
-  (or **Back to index** on case 12), so a case flows straight into the next one
+- the primary control follows the case: **Next** while slides remain, then **Back to index** at
+  the end — finishing a case lands on the main page, it never flows into the next one (`n` is the
+  deliberate way to move on)
 - a numberless position indicator (click to jump), speaker notes, click-to-zoom images, progress
   that reaches 100% exactly when the last slide is exhausted
 - a case is marked complete **the moment its last slide is displayed**, and the index then
@@ -55,10 +56,12 @@ ranges and slide counts are not shown anywhere.
 **Present mode** (`f`, or the ⤢ button) — real fullscreen, the slide scaled to fill the whole
 space, and a **minimal header whose background matches the slide** with a bottom border: case
 dropdown, prev/next, exit. Fullscreen is requested on `<html>` synchronously from the gesture, so
-**presentation continues when you move to the next case** (the overlay is not the fullscreen
-element, and the case component is not remounted). Where the API is missing — iOS Safari has no
-`Element.requestFullscreen` — the overlay alone fills the viewport, using `dvh`. `esc` leaves
-fullscreen first, a second `esc` returns to the index.
+**presentation continues while you move between cases with `n`/`p` or the dropdown** (the overlay
+is not the fullscreen element, and the case component is not remounted). Finishing a case (the
+forward control at the end, or tapping/swiping past the last slide) leaves fullscreen and returns to
+the index. Where the API is missing — iOS Safari has no `Element.requestFullscreen` — the overlay
+alone fills the viewport, using `dvh`. `esc` leaves fullscreen first, a second `esc` returns to the
+index.
 
 **Touch** — swiping horizontally moves between slides (a vertical drag still scrolls), and tapping
 an image opens it rather than advancing.
