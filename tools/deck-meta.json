@@ -1,0 +1,41 @@
+{
+  "_comment": "Conference identity + the front-matter content, authored once here and merged into public/content.json by tools/extract.py. The disclosures are the deck's own text (Conflict of Interest and Accreditation slides), re-authored as web content rather than copied from the slide.",
+  "conference": {
+    "title": "Fellow Case Conference",
+    "speaker": "Ali H Yusuf",
+    "date": "Oct 15, 2026",
+    "institution": "Emory University School of Medicine",
+    "logoPart": "ppt/media/image3.png",
+    "logoOut": "brand/emory-logo.png",
+    "providedBy": "Provided/required by Emory CME"
+  },
+  "conflictOfInterest": {
+    "title": "Conflict of Interest",
+    "subtitle": "Personal/Professional Financial Relationships with Industry within the past year",
+    "columns": ["External Industry Relationships*", "Company Name(s)", "Role"],
+    "rows": [
+      ["Equity, stock or options in biomedical industry companies or publishers**", "None", "N/A"],
+      ["Board of Directors or officer", "None", "N/A"],
+      ["Royalties from Emory or from external entity", "None", "N/A"],
+      ["Industry funds to Emory for my research", "None", "N/A"],
+      ["Other", "None", "N/A"]
+    ],
+    "footnotes": [
+      "* Consulting, scientific advisory board, industry-sponsored CME, expert witness for company, FDA representative for company, publishing contract, etc.",
+      "** Does not include stock in publicly-traded companies in retirement funds and other pooled investment accounts managed by others."
+    ]
+  },
+  "accreditation": {
+    "title": "Accreditation & credit designation",
+    "sections": [
+      {
+        "heading": "Accreditation Statement",
+        "body": "The Emory University School of Medicine is accredited by the Accreditation Council for Continuing Medical Education (ACCME) to provide continuing medical education for physicians."
+      },
+      {
+        "heading": "Credit Designation Statement",
+        "body": "The Emory University School of Medicine designates this Regularly Scheduled Series (RSS) CME Activity for 1 credit per session for a maximum of 1.0 AMA PRA Category 1 Credits™. Physicians should claim only the credit commensurate with the extent of their participation in the activity."
+      }
+    ]
+  }
+}

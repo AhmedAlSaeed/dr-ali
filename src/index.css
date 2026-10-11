@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+/* shadcn/ui token system (Tailwind v4 flavour): semantic CSS vars mapped to utilities */
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.75rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  /* Emory accent, sampled from the deck's title stripes */
+  --brand: oklch(0.76 0.12 98);
+  --brand-foreground: oklch(0.2 0.03 260);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.19 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.19 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --brand: oklch(0.79 0.13 95);
+  --brand-foreground: oklch(0.18 0.02 260);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply bg-background;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  ::selection {
+    @apply bg-brand/30;
+  }
+}
+
+/* the deck's own fonts are PowerPoint fonts; the web uses a matching system stack instead */
+.slide-canvas {
+  font-family: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.011em;
+}
+
+/* motion: one system for the whole deck.
+   - .slide-in      : every slide change fades the slide in (identical everywhere)
+   - .reveal-hidden : content the deck holds back until a click (13 slides)
+   - .reveal-shown  : the deck's "Appear" entrance, used by every element that appears
+   Durations/easing live here so nothing drifts apart. */
+:root {
+  /* one entrance system for the whole site: every appearance uses these */
+  --entrance-duration: 340ms;
+  --entrance-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --entrance-lift: 0.4rem;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.slide-in {
+  animation: slide-in var(--entrance-duration) var(--entrance-ease) both;
+}
+
+/* NB: this animates the independent `translate` property, not `transform`, so an element's own
+   rotation (set inline from the deck) survives the animation. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--entrance-lift);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+.reveal-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.reveal-shown {
+  animation: reveal-in var(--entrance-duration) var(--entrance-ease) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-shown {
+    animation: none;
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.overlay-in {
+  animation: overlay-in var(--entrance-duration) var(--entrance-ease) both;
+}

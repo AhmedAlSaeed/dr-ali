@@ -1,0 +1,389 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronLeft,
+  CornerDownLeft,
+  Info,
+  ListChecks,
+  Maximize2,
+  Minimize2,
+  Undo2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { CaseMenu } from "@/components/CaseMenu";
+import { Lightbox } from "@/components/Lightbox";
+import { SlideView, slideTheme } from "@/components/SlideView";
+import { Stage } from "@/components/Stage";
+import { stepsInSlide, type CaseEntry, type Deck, type Picture } from "@/lib/deck";
+import { useProgress } from "@/lib/progress";
+import { cn } from "@/lib/utils";
+
+export function CasePage({
+  deck,
+  cases,
+  positions,
+  label,
+  caseN,
+  onExit,
+  nextHref,
+  prevHref,
+}: {
+  deck: Deck;
+  cases: CaseEntry[];
+  positions: number[];
+  label: string;
+  caseN?: number;
+  onExit: () => void;
+  nextHref?: string | null;
+  prevHref?: string | null;
+}) {
+  const progress = useProgress();
+  const [index, setIndex] = useState(0);
+  const [step, setStep] = useState(0);
+  const [zoom, setZoom] = useState<Picture | null>(null);
+  const [showNotes, setShowNotes] = useState(false);
+  const [present, setPresent] = useState(false);
+  const presentRef = useRef<HTMLDivElement>(null);
+
+  const slide = useMemo(
+    () => deck.slides.find((s) => s.pos === positions[Math.min(index, positions.length - 1)])!,
+    [deck, positions, index],
+  );
+  const steps = stepsInSlide(slide);
+  const atEnd = index === positions.length - 1 && step >= steps;
+  const done = caseN ? !!progress.done[caseN] : false;
+  const theme = slideTheme(slide);
+  const hairline = theme.light ? "rgba(15,23,42,0.14)" : "rgba(255,255,255,0.16)";
+  const entry = caseN ? cases.find((c) => c.n === caseN) : undefined;
+
+  const next = useCallback(() => {
+    if (step < steps) setStep(step + 1);
+    else if (index < positions.length - 1) {
+      setIndex(index + 1);
+      setStep(0);
+    }
+  }, [step, steps, index, positions.length]);
+
+  const prev = useCallback(() => {
+    if (step > 0) setStep(step - 1);
+    else if (index > 0) {
+      const target = positions[index - 1];
+      const s = deck.slides.find((x) => x.pos === target)!;
+      setIndex(index - 1);
+      setStep(stepsInSlide(s));
+    }
+  }, [step, index, positions, deck]);
+
+  const goTo = useCallback((i: number) => {
+    setIndex(i);
+    setStep(0);
+  }, []);
+
+  const pickCase = useCallback((n: number) => {
+    window.location.hash = `#/c/${n}`;
+  }, []);
+
+  // ---- fullscreen -----------------------------------------------------------
+  // The present layout does not exist until React commits, so the fullscreen request has to
+  // wait for the ref — calling it straight from the click handler was a no-op.
+  const enterPresent = useCallback(() => setPresent(true), []);
+
+  useEffect(() => {
+    if (!present) return;
+    const el = presentRef.current;
+    if (el && !document.fullscreenElement) {
+      el.requestFullscreen().catch(() => {
+        /* refused (no user gesture / policy): the overlay still covers the viewport */
+      });
+    }
+  }, [present]);
+
+  const exitPresent = useCallback(async () => {
+    setPresent(false);
+    if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const onChange = () => {
+      if (!document.fullscreenElement) setPresent(false); // left fullscreen (Esc / F11)
+    };
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  // ---- remember position, auto-complete on the last slide --------------------
+  useEffect(() => {
+    if (caseN) progress.setLast(caseN, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caseN, index]);
+
+  // "the case's last slide is on screen" is the completion rule - whether or not that slide
+  // has a click-to-reveal step (the deck's own last slides do not)
+  useEffect(() => {
+    if (caseN && index === positions.length - 1) progress.setDone(caseN, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caseN, index, positions.length]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+        case "PageDown":
+        case " ":
+        case "Enter":
+          e.preventDefault();
+          next();
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+        case "PageUp":
+        case "Backspace":
+          e.preventDefault();
+          prev();
+          break;
+        case "Escape":
+        case "Home":
+          e.preventDefault();
+          // in present mode Esc leaves fullscreen first, a second press goes to the index
+          if (present) exitPresent();
+          else onExit();
+          break;
+        case "n":
+          if (nextHref) window.location.hash = nextHref;
+          break;
+        case "p":
+          if (prevHref) window.location.hash = prevHref;
+          break;
+        case "f":
+          if (present) exitPresent();
+          else enterPresent();
+          break;
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [next, prev, onExit, nextHref, prevHref, present, enterPresent, exitPresent]);
+
+  // full at the end of the last slide: the step fraction is divided by the step count, not
+  // by steps+1, otherwise the bar could never reach 100%
+  const stepFraction = steps > 0 ? Math.min(step, steps) / steps : 1;
+  const caseProgress = ((index + stepFraction) / positions.length) * 100;
+
+  const stepDots = steps > 0 && (
+    <span className="flex items-center gap-1">
+      {Array.from({ length: steps + 1 }).map((_, i) => (
+        <span
+          key={i}
+          className={cn(
+            "size-1.5 rounded-full transition-colors",
+            i <= step ? "bg-brand" : present ? "bg-current/25" : "bg-muted-foreground/30",
+          )}
+        />
+      ))}
+    </span>
+  );
+
+  // ============================ present mode ================================
+  if (present) {
+    return (
+      <div
+        ref={presentRef}
+        className="fixed inset-0 z-50 flex h-screen w-screen flex-col"
+        style={{ background: theme.background, color: theme.foreground }}
+      >
+        <header
+          className="flex shrink-0 items-center gap-3 border-b px-3 py-2"
+          style={{ borderColor: hairline, background: theme.background }}
+        >
+          <CaseMenu
+            cases={cases}
+            current={caseN}
+            done={progress.done}
+            onPick={pickCase}
+            label={label}
+            tone="slide"
+          />
+
+          {caseN && done && (
+            <span className="text-xs opacity-60">{entry?.diagnosis}</span>
+          )}
+          <span className="ml-auto flex items-center gap-3 text-xs opacity-70">{stepDots}</span>
+          {atEnd && nextHref && (
+            <Button variant="secondary" size="sm" onClick={() => (window.location.hash = nextHref)}>
+              Next case <ArrowRight className="size-4" />
+            </Button>
+          )}
+          <button
+            type="button"
+            onClick={exitPresent}
+            title="Exit presentation (esc or f)"
+            aria-label="Exit presentation"
+            className="rounded-md p-1.5 transition-colors hover:bg-current/10"
+          >
+            <Minimize2 className="size-4" />
+          </button>
+        </header>
+
+        <div className="min-h-0 flex-1" onClick={next} onKeyDown={(e) => e.key === "Enter" && next()}>
+          <Stage fit="contain">
+            <SlideView slide={slide} step={step} onZoom={setZoom} />
+          </Stage>
+        </div>
+
+        <Lightbox picture={zoom} onClose={() => setZoom(null)} />
+      </div>
+    );
+  }
+
+  // ============================== inline view ===============================
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 md:px-6 md:py-8">
+      <header className="flex flex-wrap items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={onExit} className="gap-1.5">
+          <ChevronLeft className="size-4" /> Index
+        </Button>
+        <Separator orientation="vertical" className="h-5" />
+        <CaseMenu
+          cases={cases}
+          current={caseN}
+          done={progress.done}
+          onPick={pickCase}
+          label={label}
+        />
+        {caseN && done && (
+          <span className="text-muted-foreground hidden min-w-0 truncate text-xs sm:inline">
+            {cases.find((c) => c.n === caseN)?.diagnosis}
+          </span>
+        )}
+        <div className="ml-auto flex items-center gap-2">
+          {prevHref && (
+            <Button variant="outline" size="sm" onClick={() => (window.location.hash = prevHref)}>
+              <ChevronLeft className="size-4" /> Prev
+            </Button>
+          )}
+          {nextHref && (
+            <Button variant="outline" size="sm" onClick={() => (window.location.hash = nextHref)}>
+              Next case <ChevronLeft className="size-4 rotate-180" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Present"
+            title="Present (f) — true fullscreen"
+            onClick={enterPresent}
+          >
+            <Maximize2 className="size-4" />
+          </Button>
+        </div>
+      </header>
+
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="Next"
+        onClick={next}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") next();
+        }}
+        className="cursor-pointer focus-visible:outline-none"
+      >
+        <Stage>
+          <SlideView slide={slide} step={step} onZoom={setZoom} />
+        </Stage>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={prev} disabled={index === 0 && step === 0}>
+            <ArrowLeft className="size-4" />
+          </Button>
+          <Button variant="secondary" size="sm" onClick={next}>
+            {atEnd ? "Finished" : "Next"} <ArrowRight className="size-4" />
+          </Button>
+        </div>
+
+        <div className="text-muted-foreground flex items-center gap-3 text-xs">{stepDots}</div>
+
+        {slide.notes && (
+          <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => setShowNotes(!showNotes)}>
+            <Info className="size-4" /> Notes
+          </Button>
+        )}
+
+        {/* position indicator, no slide numbers: click a segment to jump */}
+        <div className="ml-auto flex flex-wrap items-center gap-1" data-slide-index={index}>
+          {positions.map((p, i) => (
+            <button
+              key={p}
+              data-slide-nav={i}
+              aria-label={`Go to position ${i + 1}`}
+              onClick={() => goTo(i)}
+              className={cn(
+                "h-1.5 w-6 rounded-full transition-colors",
+                i === index
+                  ? "bg-brand"
+                  : i < index
+                    ? "bg-muted-foreground/50 hover:bg-muted-foreground"
+                    : "bg-muted-foreground/20 hover:bg-muted-foreground/40",
+              )}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="h-1">
+        <Progress value={caseProgress} />
+      </div>
+
+      {showNotes && slide.notes && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-muted-foreground flex items-center gap-2 text-xs uppercase tracking-wider">
+              <ListChecks className="size-3.5" /> Speaker notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-muted-foreground text-sm">{slide.notes}</CardContent>
+        </Card>
+      )}
+
+      {atEnd && caseN && (
+        <Card className="border-brand/40 bg-brand/[0.04]">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Check className="text-brand size-4" /> Case {caseN} marked complete
+            </CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Stored on this device — the index shows the diagnosis once a case is complete.
+            </p>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-2">
+            <Button onClick={onExit} className="gap-2">
+              <CornerDownLeft className="size-4" /> Back to index
+            </Button>
+            {nextHref && (
+              <Button variant="secondary" onClick={() => (window.location.hash = nextHref)}>
+                Next case <ArrowRight className="size-4" />
+              </Button>
+            )}
+            <Button variant="ghost" className="gap-2" onClick={() => progress.setDone(caseN, false)}>
+              <Undo2 className="size-4" /> Undo
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      <Lightbox picture={zoom} onClose={() => setZoom(null)} />
+
+      <p className="text-muted-foreground/70 text-center text-xs">
+        click anywhere or press space to advance · ← back · esc index · n/p case · f present
+      </p>
+    </div>
+  );
+}

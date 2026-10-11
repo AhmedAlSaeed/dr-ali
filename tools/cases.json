@@ -1,0 +1,17 @@
+{
+  "_comment": "Curated case labels, taken from the deck's own answer slides (and matching the Case Index built for the .pptx). The site shows the vignette up front and reveals `dx` only once a case is marked complete, so the index does not spoil the diagnosis.",
+  "cases": [
+    { "n": 1,  "dx": "Influenza-Associated Acute Necrotizing Encephalopathy", "companion": "Artery of Percheron infarct" },
+    { "n": 2,  "dx": "Cervical Cord Reperfusion Injury",                        "companion": "Cerebral hyperperfusion syndrome" },
+    { "n": 3,  "dx": "Adamantinomatous Craniopharyngioma",                      "companion": "Papillary craniopharyngioma" },
+    { "n": 4,  "dx": "Skull Base Chondrosarcoma",                                "companion": "Chordoma" },
+    { "n": 5,  "dx": "Corticobasal Degeneration",                                "companion": null },
+    { "n": 6,  "dx": "Progressive Supranuclear Palsy",                           "companion": null },
+    { "n": 7,  "dx": "Cavernous Sinus Thrombosis",                               "companion": null },
+    { "n": 8,  "dx": "CARASIL",                                                  "companion": null },
+    { "n": 9,  "dx": "Non-Traumatic Fat Embolism",                               "companion": null },
+    { "n": 10, "dx": "Extramedullary Hematopoiesis",                             "companion": null },
+    { "n": 11, "dx": "Neurocysticercosis",                                       "companion": null },
+    { "n": 12, "dx": "Papillary Carcinoma in Thyroglossal Duct Cyst",            "companion": null }
+  ]
+}
