@@ -607,16 +607,17 @@ def _cluster_rows(pics: list[dict], tol: float = 0.6) -> list[list[dict]]:
 
 
 def normalise_grids(slide: dict) -> bool:
-    """Snap an image grid to even columns and rows, centred in the slide.
+    """Snap an image grid to even columns and rows, keeping the deck's own placement.
 
     The deck's grids come out of Google Slides with per-image frames: rows don't share a top,
     columns don't line up between rows, and the block can run past the slide edge. Where a grid
     is detected (two or more rows, or a filmstrip of three) it is rebuilt: equal heights per row,
-    shared column widths, equal gaps, centred, and scaled down if it would not fit.
+    shared column widths, equal gaps, and scaled down if it would not fit.
 
     The rebuilt block also has to keep out of the slide's other content: text beside it (case 6's
     diagnosis slide, case 8's rotated row labels) sets the horizontal band, text above or below it
-    (case 2's time-point captions) the vertical one.
+    (case 2's time-point captions) the vertical one, and the deck's own top edge is a floor — the
+    rebuilt block never rises above where the author put it, so it cannot climb into a caption.
     """
     pics = slide["pictures"]
     if len(pics) < 3:
@@ -671,10 +672,11 @@ def normalise_grids(slide: dict) -> bool:
         x0 = left_edge
     else:
         x0 = left_edge + (avail_w - total_w) / 2
-    # vertically, keep the deck's "centred on the slide" placement, then pull it out of any
-    # caption above or below — clamping rather than re-centring, so a slide whose grid already
-    # sat where the deck put it does not drift
-    y0 = min(max((SLIDE_H - total_h) / 2, band_t), max(band_t, band_b - total_h))
+    # Vertically, keep the deck's own placement and never sit higher than the deck had the block:
+    # the author's position already clears whatever is above it, whereas centring on the slide can
+    # carry the grid up over it (slide 41's title). Text above or below still wins, and a block that
+    # would run off the bottom is pulled back in.
+    y0 = min(max((SLIDE_H - total_h) / 2, band_t, pic_top), max(band_t, band_b - total_h))
     y = y0
     for row, h in zip(rows, row_h):
         x = x0

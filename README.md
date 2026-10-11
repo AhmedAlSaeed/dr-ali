@@ -114,16 +114,17 @@ Two more normalisations the deck needed:
   (not applied with CSS), and the picture then fills its frame exactly as the deck does, so aspect
   ratios come out right (median frame-vs-file mismatch 0.03%).
 - **Image grids.** On 16 slides the grids are rebuilt: rows share a top and height, columns share
-  x positions across rows, gaps are uniform (0.08in), the block is centred and scaled to fit inside
-  the slide, and it stays clear of the slide's other content — text beside it (case 6 keeps the text
-  left, images right) and text above or below it (case 2's time-point labels, case 6's 2020/2023/2026
-  captions). Centring used to carry a grid up over those captions; the block is now clamped out of
-  the text's band instead of running into it.
+  x positions across rows, gaps are uniform (0.08in), and the block is scaled down if it would not
+  fit inside the slide. It also has to keep out of the slide's other content — text beside it
+  (case 6 keeps the text left, images right) and text above or below it (case 2's time-point labels,
+  case 6's 2020/2023/2026 captions). The deck's own top edge is a floor: the rebuilt block never
+  rises above where the author put it, so evened-out rows can't climb into a caption above them.
 - **Rotated text** (`rot="270deg"` row labels) is rendered rotated, placed by its rotated bounding
   box.
 
-`tools/audit-slides.mjs` asserts nothing escapes its box or the slide: currently **0 problems
-across all 78 slides**.
+`tools/audit-slides.mjs` asserts nothing escapes its box or the slide, and
+`tools/audit-overlap.mjs` measures the *rendered* glyphs of every text block against every picture
+frame: currently **0 problems across all 78 slides**, and **0 text-on-picture overlaps**.
 
 ## Deploy
 
@@ -145,6 +146,7 @@ tools/extract.py          deck -> content.json (+ media + logo). The only deck-a
 tools/cases.json          case names as specified by the presenter (+ companion labels)
 tools/deck-meta.json      conference identity + Conflict of Interest / Accreditation content
 tools/audit-slides.mjs    every slide: text overflow / outside-slide check
+tools/audit-overlap.mjs   every slide: rendered text glyphs vs picture frames (text on an image)
 tools/verify-site.mjs     behaviour: index, spoilers, reveal, images, completion, counter
 tools/verify-animation.mjs  one animation system; the deck's click-step still gates content
 tools/verify-present.mjs  case switching resets, fullscreen, header, fills the space, continuity
