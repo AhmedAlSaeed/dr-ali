@@ -118,8 +118,8 @@ const finished = await page.evaluate(() => ({
   fullscreen: !!document.fullscreenElement,
   overlay: !!document.querySelector(".fixed.inset-0"),
 }));
-ok("finishing the case leaves fullscreen and returns to the index",
-   finished.hash === "#/" && !finished.fullscreen && !finished.overlay, JSON.stringify(finished));
+ok("finishing the case returns to the index inside fullscreen",
+   finished.hash === "#/" && finished.fullscreen && !finished.overlay, JSON.stringify(finished));
 
 // Esc leaves fullscreen but stays on the slide; a second Esc goes to the index
 await page.evaluate(() => (window.location.hash = "#/c/2"));

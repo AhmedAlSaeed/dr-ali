@@ -80,18 +80,12 @@ export function CasePage({
   // The single forward action used by the button, by tapping the slide and by swiping: advance
   // while the case has slides left, then finish the case by returning to the main page — a case
   // never runs into the next one on its own (`n` is the deliberate way to keep going).
+  // Presentation is left alone: the index simply appears inside fullscreen, ready for the next
+  // case to be picked.
   const forwardLabel = atEnd ? "Back to index" : "Next";
   const forward = useCallback(() => {
-    if (!atEnd) {
-      next();
-      return;
-    }
-    // the case is finished: leave presentation, then land on the index
-    setPresent(false);
-    if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
-      document.exitFullscreen().catch(() => {});
-    }
-    onExit();
+    if (!atEnd) next();
+    else onExit();
   }, [atEnd, next, onExit]);
 
   const goTo = useCallback((i: number) => {

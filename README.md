@@ -58,8 +58,9 @@ space, and a **minimal header whose background matches the slide** with a bottom
 dropdown, prev/next, exit. Fullscreen is requested on `<html>` synchronously from the gesture, so
 **presentation continues while you move between cases with `n`/`p` or the dropdown** (the overlay
 is not the fullscreen element, and the case component is not remounted). Finishing a case (the
-forward control at the end, or tapping/swiping past the last slide) leaves fullscreen and returns to
-the index. Where the API is missing — iOS Safari has no `Element.requestFullscreen` — the overlay
+forward control at the end, or tapping/swiping past the last slide) returns to the index **without
+leaving fullscreen**, so the next case can be picked from the main page and presented straight away.
+Where the API is missing — iOS Safari has no `Element.requestFullscreen` — the overlay
 alone fills the viewport, using `dvh`. `esc` leaves fullscreen first, a second `esc` returns to the
 index.
 
