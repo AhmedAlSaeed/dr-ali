@@ -121,15 +121,31 @@ const finished = await page.evaluate(() => ({
 ok("finishing the case returns to the index inside fullscreen",
    finished.hash === "#/" && finished.fullscreen && !finished.overlay, JSON.stringify(finished));
 
+// ---- picking a case from an index that is already fullscreen presents it straight away ----
+await page.evaluate(() => document.querySelector("[data-case-card]")?.click());
+await settle(900);
+const picked = await page.evaluate(() => ({
+  hash: location.hash,
+  fullscreen: !!document.fullscreenElement,
+  overlay: !!document.querySelector(".fixed.inset-0"),
+}));
+ok("a case picked from a fullscreen index opens in present mode",
+   picked.hash.startsWith("#/c/") && picked.fullscreen && picked.overlay, JSON.stringify(picked));
+
 // Esc leaves fullscreen but stays on the slide; a second Esc goes to the index
-await page.evaluate(() => (window.location.hash = "#/c/2"));
-await settle(800);
-await page.keyboard.press("f");
-await settle(800);
 await page.keyboard.press("Escape");
-await settle(500);
-const stillCase = await page.evaluate(() => location.hash);
-ok("esc exits present mode, stays in the case", stillCase.startsWith("#/c/"), stillCase);
+await settle(600);
+const stillCase = await page.evaluate(() => ({
+  hash: location.hash,
+  fullscreen: !!document.fullscreenElement,
+  overlay: !!document.querySelector(".fixed.inset-0"),
+}));
+ok("esc exits present mode, stays in the case",
+   stillCase.hash.startsWith("#/c/") && !stillCase.fullscreen && !stillCase.overlay, JSON.stringify(stillCase));
+await page.keyboard.press("Escape");
+await settle(600);
+ok("a second esc goes to the index", (await page.evaluate(() => location.hash)) === "#/",
+   await page.evaluate(() => location.hash));
 
 await browser.close().catch(() => {});
 process.exit(0);

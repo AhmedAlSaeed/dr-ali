@@ -59,10 +59,10 @@ dropdown, prev/next, exit. Fullscreen is requested on `<html>` synchronously fro
 **presentation continues while you move between cases with `n`/`p` or the dropdown** (the overlay
 is not the fullscreen element, and the case component is not remounted). Finishing a case (the
 forward control at the end, or tapping/swiping past the last slide) returns to the index **without
-leaving fullscreen**, so the next case can be picked from the main page and presented straight away.
-Where the API is missing — iOS Safari has no `Element.requestFullscreen` — the overlay
-alone fills the viewport, using `dvh`. `esc` leaves fullscreen first, a second `esc` returns to the
-index.
+leaving fullscreen**, and a case picked from that index **opens straight into present mode** — so a
+whole session can run from the index in fullscreen. Where the API is missing — iOS Safari has no
+`Element.requestFullscreen` — the overlay alone fills the viewport, using `dvh`. `esc` leaves
+fullscreen first, a second `esc` returns to the index.
 
 **Touch** — swiping horizontally moves between slides (a vertical drag still scrolls), and tapping
 an image opens it rather than advancing.

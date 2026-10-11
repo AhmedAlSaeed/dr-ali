@@ -45,7 +45,11 @@ export function CasePage({
   const [step, setStep] = useState(0);
   const [zoom, setZoom] = useState<Picture | null>(null);
   const [showNotes, setShowNotes] = useState(false);
-  const [present, setPresent] = useState(false);
+  // Already fullscreen (a case was just finished, or the page is being presented)? Then a case
+  // opens straight into the present overlay instead of the inline view — the fullscreen stays put.
+  const [present, setPresent] = useState(
+    () => typeof document !== "undefined" && !!document.fullscreenElement,
+  );
   const presentRef = useRef<HTMLDivElement>(null);
 
   const slide = useMemo(
