@@ -3,9 +3,8 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  CornerDownLeft,
+  House,
   Info,
-  LayoutGrid,
   ListChecks,
   Maximize2,
   Minimize2,
@@ -342,7 +341,7 @@ export function CasePage({
             data-forward
             className="rounded-md p-1.5 transition-colors hover:bg-current/10"
           >
-            {!atEnd ? <ChevronRight className="size-4" /> : <LayoutGrid className="size-4" />}
+            {!atEnd ? <ChevronRight className="size-4" /> : <House className="size-4" />}
           </button>
           <button
             type="button"
@@ -377,7 +376,7 @@ export function CasePage({
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 md:px-6 md:py-8">
       <header className="flex flex-wrap items-center gap-3">
         <Button variant="ghost" size="sm" onClick={onExit} className="gap-1.5">
-          <ChevronLeft className="size-4" /> Index
+          <House className="size-4" /> Index
         </Button>
         <Separator orientation="vertical" className="h-5" />
         <CaseMenu
@@ -403,10 +402,10 @@ export function CasePage({
           >
             <ChevronLeft className="size-4" />
           </Button>
-          {/* arrows only: a single chevron advances, the index icon appears once the case is
+          {/* arrows only: a single chevron advances, the home icon appears once the case is
               finished and takes you back to the main page */}
           <Button variant="outline" size="icon" onClick={forward} data-forward aria-label={forwardLabel}>
-            {!atEnd ? <ChevronRight className="size-4" /> : <LayoutGrid className="size-4" />}
+            {!atEnd ? <ChevronRight className="size-4" /> : <House className="size-4" />}
           </Button>
           <Button
             variant="ghost"
@@ -475,7 +474,7 @@ export function CasePage({
           </CardHeader>
           <CardContent className="flex flex-wrap items-center gap-2">
             <Button onClick={onExit} className="gap-2">
-              <CornerDownLeft className="size-4" /> Back to index
+              <House className="size-4" /> Back to index
             </Button>
             <Button variant="ghost" className="gap-2" onClick={() => progress.setDone(caseN, false)}>
               <Undo2 className="size-4" /> Undo
