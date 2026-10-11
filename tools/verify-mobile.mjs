@@ -18,6 +18,15 @@ const hash = () => p.evaluate(() => location.hash);
 const slideIndex = () => p.$eval("[data-slide-index]", (e) => Number(e.getAttribute("data-slide-index")));
 const forwardLabel = () => p.$eval("[data-forward]", (e) => (e.textContent ?? "").trim());
 const click = (sel) => p.click(sel);
+const swipe = (dx) =>
+  p.evaluate((d) => {
+    const el = document.querySelector('[role="button"][aria-label="Next"]');
+    const at = (type, x, y) =>
+      el.dispatchEvent(new PointerEvent(type, { bubbles: true, clientX: x, clientY: y, pointerType: "touch" }));
+    at("pointerdown", 300, 300);
+    at("pointerup", 300 + d, 300);
+  }, dx);
+
 
 // ---- iOS Safari has no Element.requestFullscreen: make sure that cannot break the view ----
 await p.evaluateOnNewDocument(() => {
@@ -71,20 +80,22 @@ ok("header Prev goes back to the previous slide", (await slideIndex()) < afterNe
 let label = await forwardLabel();
 for (let i = 0; i < 30 && label !== "Next case"; i++) { await step(); label = await forwardLabel(); }
 ok("at the end of the case the header offers Next case", label === "Next case", label);
-await step();
-ok("which opens the next case at its first slide",
+
+// tapping the slide on the last slide continues to the next case, like the button
+await p.evaluate(() => document.querySelector('[role="button"][aria-label="Next"]')?.click());
+await settle(900);
+ok("tapping the slide on the last slide opens the next case",
    (await hash()) === "#/c/4" && (await slideIndex()) === 0, `${await hash()} index ${await slideIndex()}`);
 
-// ---- swipe ----
-const swipe = (dx) =>
-  p.evaluate((d) => {
-    const el = document.querySelector('[role="button"][aria-label="Next"]');
-    const at = (type, x, y) =>
-      el.dispatchEvent(new PointerEvent(type, { bubbles: true, clientX: x, clientY: y, pointerType: "touch" }));
-    at("pointerdown", 300, 300);
-    at("pointerup", 300 + d, 300);
-  }, dx);
+// and so does swiping past it
+let guard = 0;
+while ((await forwardLabel()) !== "Next case" && guard++ < 30) await step();
+await swipe(-180);
+await settle(900);
+ok("swiping past the last slide opens the next case",
+   (await hash()) === "#/c/5" && (await slideIndex()) === 0, `${await hash()} index ${await slideIndex()}`);
 
+// ---- swipe ----
 // a swipe also consumes any pending reveal first, so clear those before measuring
 for (let i = 0; i < 4 && (await p.$$eval(".reveal-hidden", (e) => e.length)) > 0; i++) {
   await click("[data-forward]");

@@ -78,8 +78,9 @@ export function CasePage({
     }
   }, [step, index, positions, deck]);
 
-  // At the end of a case the primary button moves on: to the next case, or to the index when
-  // there is no next case.
+  // The single forward action used by the button, by tapping the slide and by swiping: advance
+  // while the case has slides left, then continue into the next case (or back to the index after
+  // the last one).
   const forwardLabel = atEnd ? (nextHref ? "Next case" : "Back to index") : "Next";
   const forward = useCallback(() => {
     if (!atEnd) {
@@ -125,12 +126,12 @@ export function CasePage({
     // horizontal only, so a vertical drag still scrolls the page
     if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
     markSuppressed();
-    if (dx < 0) next();
+    if (dx < 0) forward();      // swiping past the last slide continues to the next case
     else prev();
   };
   const tapToAdvance = () => {
     if (consumed()) return;
-    next();
+    forward();
   };
   const openImage = (picture: Picture) => {
     if (consumed()) return;           // the tap that ended a swipe must not also zoom
@@ -211,7 +212,7 @@ export function CasePage({
         case " ":
         case "Enter":
           e.preventDefault();
-          next();
+          forward();
           break;
         case "ArrowLeft":
         case "ArrowUp":
@@ -241,7 +242,7 @@ export function CasePage({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev, onExit, nextHref, prevHref, present, enterPresent, exitPresent]);
+  }, [forward, prev, onExit, nextHref, prevHref, present, enterPresent, exitPresent]);
 
   // full at the end of the last slide: the step fraction is divided by the step count, not
   // by steps+1, otherwise the bar could never reach 100%
