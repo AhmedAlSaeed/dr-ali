@@ -32,11 +32,11 @@ export function Lightbox({ picture, onClose }: { picture: Picture | null; onClos
       >
         <X className="size-6" />
       </button>
+      {/* clicking the image closes it too — the whole overlay is the close target */}
       <img
         src={`${import.meta.env.BASE_URL}media/${picture.src}`}
         alt={picture.alt}
-        className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+        className="max-h-full max-w-full cursor-zoom-out rounded-lg object-contain shadow-2xl"
       />
       {picture.alt && (
         <p className="absolute bottom-5 left-1/2 max-w-3xl -translate-x-1/2 text-center text-sm text-white/70">

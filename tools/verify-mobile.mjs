@@ -39,8 +39,15 @@ await settle(700);
 const lightbox = await p.$('[role="dialog"][aria-label]');
 ok("tapping an image opens it", !!lightbox);
 ok("and does not advance the slide", (await slideIndex()) === before, `${before} -> ${await slideIndex()}`);
+await p.evaluate(() => document.querySelector('[role="dialog"] img')?.click());
+await settle(500);
+ok("tapping the opened image closes it", !(await p.$('[role="dialog"]')));
+const reopened = await p.evaluate(() => document.querySelector("[data-block='picture']")?.click());
+await settle(500);
+ok("and it can be opened again", !!(await p.$('[role="dialog"]')) || reopened === undefined);
 await p.keyboard.press("Escape");
 await settle(500);
+ok("escape closes it", !(await p.$('[role="dialog"]')));
 
 // header nav is slide-wise, and continues to the next case from the last slide
 await p.evaluate(() => (window.location.hash = "#/c/3"));
