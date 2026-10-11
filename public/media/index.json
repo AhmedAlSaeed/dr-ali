@@ -29,13 +29,13 @@
   ],
   "bytes": 98656
  },
- "image8-2a78fe.webp": {
+ "image8.webp": {
   "part": "ppt/media/image8.png",
   "crop": [
    0.0,
-   0.04317,
+   0.0432,
    0.0,
-   0.02675
+   0.0267
   ],
   "bytes": 82296
  },
@@ -89,91 +89,91 @@
   ],
   "bytes": 20374
  },
- "image14-97d506.webp": {
+ "image14.webp": {
   "part": "ppt/media/image14.png",
   "crop": [
-   0.13656,
-   0.14202,
-   0.19131,
-   0.08825
+   0.1366,
+   0.142,
+   0.1913,
+   0.0882
   ],
   "bytes": 5576
  },
- "image15-24c16e.webp": {
+ "image15.webp": {
   "part": "ppt/media/image15.png",
   "crop": [
-   0.14477,
-   0.13438,
-   0.18563,
-   0.09313
+   0.1448,
+   0.1344,
+   0.1856,
+   0.0931
   ],
   "bytes": 9742
  },
- "image16-2b7214.webp": {
+ "image16.webp": {
   "part": "ppt/media/image16.png",
   "crop": [
-   0.12465,
-   0.05088,
-   0.14136,
+   0.1246,
+   0.0509,
+   0.1414,
    0.0841
   ],
   "bytes": 9786
  },
- "image17-b2987b.webp": {
+ "image17.webp": {
   "part": "ppt/media/image17.png",
   "crop": [
-   0.21864,
+   0.2186,
    0.0,
    0.0,
    0.0
   ],
   "bytes": 17628
  },
- "image18-54b90f.webp": {
+ "image18.webp": {
   "part": "ppt/media/image18.jpeg",
   "crop": [
-   0.11269,
+   0.1127,
    0.0,
-   0.13673,
+   0.1367,
    0.0
   ],
   "bytes": 31086
  },
- "image19-9f0394.webp": {
+ "image19.webp": {
   "part": "ppt/media/image19.png",
   "crop": [
-   0.61852,
-   0.17409,
-   0.08417,
+   0.6185,
+   0.1741,
+   0.0842,
    0.2156
   ],
   "bytes": 12604
  },
- "image17-4aff65.webp": {
+ "image17-2.webp": {
   "part": "ppt/media/image17.png",
   "crop": [
-   0.21864,
-   0.02318,
+   0.2186,
+   0.0232,
    0.0,
-   0.02737
+   0.0274
   ],
   "bytes": 17000
  },
- "image20-abfbd0.webp": {
+ "image20.webp": {
   "part": "ppt/media/image20.png",
   "crop": [
-   0.31361,
-   0.02642,
+   0.3136,
+   0.0264,
    0.0,
-   0.03057
+   0.0306
   ],
   "bytes": 18646
  },
- "image21-7f357f.webp": {
+ "image21.webp": {
   "part": "ppt/media/image21.png",
   "crop": [
-   0.06022,
-   0.02383,
+   0.0602,
+   0.0238,
    0.0,
    0.0
   ],
@@ -189,53 +189,53 @@
   ],
   "bytes": 39260
  },
- "image23-f7599e.webp": {
+ "image23.webp": {
   "part": "ppt/media/image23.png",
   "crop": [
    0.0,
-   0.02799,
+   0.028,
    0.0,
-   0.04452
+   0.0445
   ],
   "bytes": 37752
  },
- "image24-65809c.webp": {
+ "image24.webp": {
   "part": "ppt/media/image24.png",
   "crop": [
    0.0325,
    0.0,
-   3e-05,
-   3e-05
+   0.0,
+   0.0
   ],
   "bytes": 24034
  },
- "image25-f44fb2.webp": {
+ "image25.webp": {
   "part": "ppt/media/image25.png",
   "crop": [
-   0.02608,
+   0.0261,
    0.0,
-   3e-05,
-   2e-05
+   0.0,
+   0.0
   ],
   "bytes": 44098
  },
- "image26-90475d.webp": {
+ "image26.webp": {
   "part": "ppt/media/image26.png",
   "crop": [
-   0.06041,
+   0.0604,
    0.0,
-   3e-05,
-   3e-05
+   0.0,
+   0.0
   ],
   "bytes": 51838
  },
- "image27-9584f0.webp": {
+ "image27.webp": {
   "part": "ppt/media/image27.png",
   "crop": [
-   0.18132,
+   0.1813,
    0.0,
    0.1155,
-   2e-05
+   0.0
   ],
   "bytes": 16446
  },
@@ -249,13 +249,13 @@
   ],
   "bytes": 39836
  },
- "image29-ff19e1.webp": {
+ "image29.webp": {
   "part": "ppt/media/image29.png",
   "crop": [
-   0.09983,
-   0.02523,
-   0.08993,
-   0.03979
+   0.0998,
+   0.0252,
+   0.0899,
+   0.0398
   ],
   "bytes": 15264
  },
@@ -269,11 +269,11 @@
   ],
   "bytes": 28768
  },
- "image31-f2ec15.webp": {
+ "image31.webp": {
   "part": "ppt/media/image31.png",
   "crop": [
    0.0,
-   0.10057,
+   0.1006,
    0.0,
    0.0
   ],
@@ -289,33 +289,33 @@
   ],
   "bytes": 11530
  },
- "image33-568e7f.webp": {
+ "image33.webp": {
   "part": "ppt/media/image33.png",
   "crop": [
    0.0,
-   0.10485,
-   4e-05,
-   0.00933
+   0.1048,
+   0.0,
+   0.0093
   ],
   "bytes": 48334
  },
- "image34-e64a52.webp": {
+ "image34.webp": {
   "part": "ppt/media/image34.png",
   "crop": [
    0.0,
    0.0,
-   1e-05,
-   0.15223
+   0.0,
+   0.1522
   ],
   "bytes": 37036
  },
- "image35-3c4d1c.webp": {
+ "image35.webp": {
   "part": "ppt/media/image35.png",
   "crop": [
-   0.01883,
+   0.0188,
    0.0,
-   -3e-05,
-   0.05198
+   -0.0,
+   0.052
   ],
   "bytes": 48216
  },
@@ -329,137 +329,137 @@
   ],
   "bytes": 18348
  },
- "image37-01cfd6.webp": {
+ "image37.webp": {
   "part": "ppt/media/image37.png",
   "crop": [
    0.0909,
    0.0,
-   0.07461,
-   0.07902
+   0.0746,
+   0.079
   ],
   "bytes": 13524
  },
- "image38-cb328b.webp": {
+ "image38.webp": {
   "part": "ppt/media/image38.png",
   "crop": [
-   0.08855,
+   0.0886,
    0.0,
-   0.05445,
-   0.07902
+   0.0544,
+   0.079
   ],
   "bytes": 24398
  },
- "image39-bf55bd.webp": {
+ "image39.webp": {
   "part": "ppt/media/image39.png",
   "crop": [
-   0.09885,
+   0.0988,
    0.0,
-   0.09391,
+   0.0939,
    0.0
   ],
   "bytes": 16994
  },
- "image40-d8e042.webp": {
+ "image40.webp": {
   "part": "ppt/media/image40.png",
   "crop": [
    0.0,
    0.0,
-   0.09391,
+   0.0939,
    0.0
   ],
   "bytes": 16826
  },
- "image41-1fafab.webp": {
+ "image41.webp": {
   "part": "ppt/media/image41.png",
   "crop": [
-   0.04275,
+   0.0428,
    0.0,
-   0.06352,
-   3e-05
+   0.0635,
+   0.0
   ],
   "bytes": 24140
  },
- "image42-49e15a.webp": {
+ "image42.webp": {
   "part": "ppt/media/image42.png",
   "crop": [
-   0.00067,
+   0.0007,
    0.0,
-   0.11371,
-   3e-05
+   0.1137,
+   0.0
   ],
   "bytes": 26064
  },
- "image43-7c35b3.webp": {
+ "image43.webp": {
   "part": "ppt/media/image43.png",
   "crop": [
-   0.12928,
+   0.1293,
    0.0,
-   0.10971,
-   3e-05
+   0.1097,
+   0.0
   ],
   "bytes": 24754
  },
- "image44-2c6eef.webp": {
+ "image44.webp": {
   "part": "ppt/media/image44.png",
   "crop": [
-   0.07037,
+   0.0704,
    0.0,
-   0.07748,
-   3e-05
+   0.0775,
+   0.0
   ],
   "bytes": 15334
  },
- "image45-138d14.webp": {
+ "image45.webp": {
   "part": "ppt/media/image45.png",
   "crop": [
-   0.13456,
+   0.1346,
    0.0,
-   0.24906,
-   -2e-05
+   0.2491,
+   -0.0
   ],
   "bytes": 32348
  },
- "image46-d104f7.webp": {
+ "image46.webp": {
   "part": "ppt/media/image46.png",
   "crop": [
    0.0067,
    0.0,
-   0.00322,
+   0.0032,
    0.0
   ],
   "bytes": 28254
  },
- "image47-55d2e8.webp": {
+ "image47.webp": {
   "part": "ppt/media/image47.png",
   "crop": [
    0.0485,
    0.0,
-   0.06921,
+   0.0692,
    0.0
   ],
   "bytes": 28276
  },
- "image48-d0af23.webp": {
+ "image48.webp": {
   "part": "ppt/media/image48.png",
   "crop": [
-   0.00797,
-   -0.00227,
+   0.008,
+   -0.0023,
    0.0,
-   0.08278
+   0.0828
   ],
   "bytes": 35016
  },
- "image49-a4beed.webp": {
+ "image49.webp": {
   "part": "ppt/media/image49.png",
   "crop": [
    0.0728,
    0.0,
-   0.02722,
+   0.0272,
    0.0
   ],
   "bytes": 24450
  },
- "image50-fea1d1.webp": {
+ "image50.webp": {
   "part": "ppt/media/image50.png",
   "crop": [
    0.0779,
@@ -499,75 +499,75 @@
   ],
   "bytes": 26220
  },
- "image54-a4cb83.webp": {
+ "image54.webp": {
   "part": "ppt/media/image54.png",
   "crop": [
    0.0,
    0.0,
    0.0,
-   0.08997
+   0.09
   ],
   "bytes": 82412
  },
- "image55-e7357f.webp": {
+ "image55.webp": {
   "part": "ppt/media/image55.png",
   "crop": [
-   0.02618,
+   0.0262,
    0.0,
-   0.02618,
+   0.0262,
    0.0
   ],
-  "bytes": 70874
+  "bytes": 70804
  },
- "image56-7f6523.webp": {
+ "image56.webp": {
   "part": "ppt/media/image56.png",
   "crop": [
-   0.05231,
+   0.0523,
    0.0,
    0.0,
-   0.03902
+   0.039
   ],
   "bytes": 151196
  },
- "image57-b3f964.webp": {
+ "image57.webp": {
   "part": "ppt/media/image57.png",
   "crop": [
    0.0,
    0.0,
    0.0,
-   0.14081
+   0.1408
   ],
   "bytes": 129086
  },
- "image58-6efd85.webp": {
+ "image58.webp": {
   "part": "ppt/media/image58.png",
   "crop": [
    0.0,
    0.0,
-   0.07331,
+   0.0733,
    0.0
   ],
   "bytes": 109628
  },
- "image59-34060a.webp": {
+ "image59.webp": {
   "part": "ppt/media/image59.png",
   "crop": [
-   0.08324,
+   0.0832,
    0.0,
    0.0622,
    0.0
   ],
   "bytes": 26578
  },
- "image60-cbe847.webp": {
+ "image60.webp": {
   "part": "ppt/media/image60.png",
   "crop": [
    0.0,
-   0.05285,
+   0.0529,
    0.0,
-   0.05285
+   0.0529
   ],
-  "bytes": 147854
+  "bytes": 147670
  },
  "image61.webp": {
   "part": "ppt/media/image61.png",
@@ -579,13 +579,13 @@
   ],
   "bytes": 80156
  },
- "image62-915e5b.webp": {
+ "image62.webp": {
   "part": "ppt/media/image62.png",
   "crop": [
    0.0,
    0.0,
    0.0,
-   0.09975
+   0.0998
   ],
   "bytes": 94686
  },
@@ -669,82 +669,82 @@
   ],
   "bytes": 25922
  },
- "image71-35a970.webp": {
+ "image71.webp": {
   "part": "ppt/media/image71.jpeg",
   "crop": [
-   0.15656,
-   0.17103,
-   0.14201,
-   0.08708
+   0.1566,
+   0.171,
+   0.142,
+   0.0871
   ],
   "bytes": 35388
  },
- "image72-d69a36.webp": {
+ "image72.webp": {
   "part": "ppt/media/image72.jpeg",
   "crop": [
-   0.15461,
-   0.21921,
-   0.12395,
-   0.17862
+   0.1546,
+   0.2192,
+   0.124,
+   0.1786
   ],
   "bytes": 32362
  },
- "image73-594690.webp": {
+ "image73.webp": {
   "part": "ppt/media/image73.jpeg",
   "crop": [
-   0.14103,
-   0.11452,
-   0.13752,
-   0.09573
+   0.141,
+   0.1145,
+   0.1375,
+   0.0957
   ],
   "bytes": 42946
  },
- "image74-af85dc.webp": {
+ "image74.webp": {
   "part": "ppt/media/image74.jpeg",
   "crop": [
-   0.14823,
-   0.13504,
-   0.13032,
-   0.07521
+   0.1482,
+   0.135,
+   0.1303,
+   0.0752
   ],
   "bytes": 34832
  },
- "image75-0237e7.webp": {
+ "image75.webp": {
   "part": "ppt/media/image75.jpeg",
   "crop": [
    0.1295,
-   0.14102,
+   0.141,
    0.0997,
-   0.09316
+   0.0932
   ],
   "bytes": 66454
  },
- "image76-d40ddf.webp": {
+ "image76.webp": {
   "part": "ppt/media/image76.jpeg",
   "crop": [
-   0.31416,
-   0.04354,
-   0.31555,
-   0.55567
+   0.3142,
+   0.0435,
+   0.3155,
+   0.5557
   ],
   "bytes": 16650
  },
- "image77-eea083.webp": {
+ "image77.webp": {
   "part": "ppt/media/image77.jpeg",
   "crop": [
-   0.16236,
-   0.20342,
-   0.13235,
-   0.08034
+   0.1624,
+   0.2034,
+   0.1323,
+   0.0803
   ],
   "bytes": 39302
  },
- "image76-96b749.webp": {
+ "image76-2.webp": {
   "part": "ppt/media/image76.jpeg",
   "crop": [
-   0.30554,
-   0.52467,
-   0.27492,
+   0.3055,
+   0.5247,
+   0.2749,
    0.0
   ],
   "bytes": 28068
@@ -769,143 +769,143 @@
   ],
   "bytes": 6816
  },
- "image80-df0c8c.webp": {
+ "image80.webp": {
   "part": "ppt/media/image80.jpeg",
   "crop": [
-   0.26514,
-   0.15966,
+   0.2651,
+   0.1597,
    0.25,
-   0.31524
+   0.3152
   ],
   "bytes": 32724
  },
- "image81-d4ed36.webp": {
+ "image81.webp": {
   "part": "ppt/media/image81.jpeg",
   "crop": [
    0.2588,
-   0.17284,
-   0.23734,
-   0.30206
+   0.1728,
+   0.2373,
+   0.3021
   ],
-  "bytes": 28308
+  "bytes": 28204
  },
- "image82-1c9da2.webp": {
+ "image82.webp": {
   "part": "ppt/media/image82.jpeg",
   "crop": [
-   0.27681,
-   0.29611,
-   0.25824,
-   0.27901
+   0.2768,
+   0.2961,
+   0.2582,
+   0.279
   ],
   "bytes": 13154
  },
- "image83-13d722.webp": {
+ "image83.webp": {
   "part": "ppt/media/image83.jpeg",
   "crop": [
-   0.17341,
-   0.12262,
-   0.14928,
-   0.11112
+   0.1734,
+   0.1226,
+   0.1493,
+   0.1111
   ],
   "bytes": 49548
  },
- "image84-afb26c.webp": {
+ "image84.webp": {
   "part": "ppt/media/image84.jpeg",
   "crop": [
-   0.15985,
-   0.07449,
-   0.15435,
-   0.04815
+   0.1598,
+   0.0745,
+   0.1543,
+   0.0481
   ],
   "bytes": 52832
  },
- "image85-7ad8b1.webp": {
+ "image85.webp": {
   "part": "ppt/media/image85.jpeg",
   "crop": [
-   0.14919,
-   0.07764,
-   0.16781,
-   0.07047
+   0.1492,
+   0.0776,
+   0.1678,
+   0.0705
   ],
   "bytes": 56584
  },
- "image86-d0be57.webp": {
+ "image86.webp": {
   "part": "ppt/media/image86.jpeg",
   "crop": [
-   0.32454,
-   0.52346,
-   0.29713,
-   0.02058
+   0.3245,
+   0.5235,
+   0.2971,
+   0.0206
   ],
   "bytes": 24024
  },
- "image87-bf100d.webp": {
+ "image87.webp": {
   "part": "ppt/media/image87.png",
   "crop": [
-   0.11759,
-   0.12552,
-   0.11667,
-   0.10576
+   0.1176,
+   0.1255,
+   0.1167,
+   0.1058
   ],
   "bytes": 59548
  },
- "image88-a1b99f.webp": {
+ "image88.webp": {
   "part": "ppt/media/image88.jpeg",
   "crop": [
-   0.13406,
-   0.15267,
-   0.14447,
-   0.06132
+   0.1341,
+   0.1527,
+   0.1445,
+   0.0613
   ],
   "bytes": 54226
  },
- "image89-cea75c.webp": {
+ "image89.webp": {
   "part": "ppt/media/image89.jpeg",
   "crop": [
-   0.12024,
-   0.15399,
-   0.15828,
-   0.05268
+   0.1202,
+   0.154,
+   0.1583,
+   0.0527
   ],
   "bytes": 36854
  },
- "image90-d638b2.webp": {
+ "image90.webp": {
   "part": "ppt/media/image90.jpeg",
   "crop": [
-   0.15002,
-   0.15111,
-   0.12851,
-   0.05556
+   0.15,
+   0.1511,
+   0.1285,
+   0.0556
   ],
   "bytes": 28440
  },
- "image91-f5a9a9.webp": {
+ "image91.webp": {
   "part": "ppt/media/image91.jpeg",
   "crop": [
-   0.14585,
-   0.16221,
-   0.16525,
-   0.06445
+   0.1459,
+   0.1622,
+   0.1653,
+   0.0644
   ],
   "bytes": 29104
  },
- "image92-571614.webp": {
+ "image92.webp": {
   "part": "ppt/media/image92.jpeg",
   "crop": [
    0.0977,
-   0.09111,
-   0.05557,
-   0.06667
+   0.0911,
+   0.0556,
+   0.0667
   ],
   "bytes": 58600
  },
- "image93-6cbb09.webp": {
+ "image93.webp": {
   "part": "ppt/media/image93.jpeg",
   "crop": [
-   0.30452,
-   0.56333,
-   0.31721,
-   0.00555
+   0.3045,
+   0.5633,
+   0.3172,
+   0.0056
   ],
   "bytes": 22468
  },
@@ -919,83 +919,83 @@
   ],
   "bytes": 33490
  },
- "image95-d331aa.webp": {
+ "image95.webp": {
   "part": "ppt/media/image95.jpeg",
   "crop": [
-   0.04908,
-   0.04222,
-   0.08917,
-   0.05333
+   0.0491,
+   0.0422,
+   0.0892,
+   0.0533
   ],
-  "bytes": 129194
+  "bytes": 129134
  },
- "image96-302826.webp": {
+ "image96.webp": {
   "part": "ppt/media/image96.png",
   "crop": [
    0.0,
    0.1819,
    0.0,
-   0.01767
+   0.0177
   ],
   "bytes": 37124
  },
- "image97-20a6d0.webp": {
+ "image97.webp": {
   "part": "ppt/media/image97.jpeg",
   "crop": [
-   0.23799,
+   0.238,
    0.0,
-   0.21339,
-   0.50445
+   0.2134,
+   0.5044
   ],
   "bytes": 24410
  },
- "image97-2e79de.webp": {
+ "image97-2.webp": {
   "part": "ppt/media/image97.jpeg",
   "crop": [
-   0.19676,
+   0.1968,
    0.5,
-   0.19438,
+   0.1944,
    0.0
   ],
   "bytes": 24706
  },
- "image98-a076a1.webp": {
+ "image98.webp": {
   "part": "ppt/media/image98.jpeg",
   "crop": [
-   0.28707,
+   0.2871,
    0.26,
-   0.26201,
-   0.26445
+   0.262,
+   0.2645
   ],
-  "bytes": 19888
+  "bytes": 19910
  },
- "image99-5a19d9.webp": {
+ "image99.webp": {
   "part": "ppt/media/image99.jpeg",
   "crop": [
-   0.19687,
-   0.14445,
-   0.14929,
-   0.13778
+   0.1969,
+   0.1444,
+   0.1493,
+   0.1378
   ],
   "bytes": 61950
  },
- "image100-0879c1.webp": {
+ "image100.webp": {
   "part": "ppt/media/image100.jpeg",
   "crop": [
-   0.19663,
-   0.16444,
-   0.14953,
-   0.16223
+   0.1966,
+   0.1644,
+   0.1495,
+   0.1622
   ],
-  "bytes": 35820
+  "bytes": 36168
  },
- "image101-283b46.webp": {
+ "image101.webp": {
   "part": "ppt/media/image101.jpeg",
   "crop": [
-   0.03155,
-   0.07334,
-   0.04908,
-   0.09555
+   0.0316,
+   0.0733,
+   0.0491,
+   0.0955
   ],
   "bytes": 74096
  },

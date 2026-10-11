@@ -137,8 +137,10 @@ export type Deck = {
 export const SLIDE_W = 13.333; // inches — the deck is 16:9 at 12192000 x 6858000 EMU
 export const SLIDE_H = 7.5;
 
+declare const __BUILD_ID__: string;
+
 export async function loadDeck(): Promise<Deck> {
-  const res = await fetch(`${import.meta.env.BASE_URL}content.json`);
+  const res = await fetch(`${import.meta.env.BASE_URL}content.json?v=${__BUILD_ID__}`);
   if (!res.ok) throw new Error(`could not load content.json (${res.status})`);
   return (await res.json()) as Deck;
 }

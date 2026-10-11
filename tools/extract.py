@@ -888,12 +888,23 @@ def main() -> None:
         import hashlib
         import io
 
+        # Names are stable per source image: image18.webp, image18-2.webp, … assigned in a
+        # deterministic order. Renaming files when a crop changes would break any browser (or
+        # intermediate cache) still holding the previous content.json — the old names must
+        # keep resolving.
+        crops_by_part: dict[str, list[tuple]] = {}
+        for sl in slides:
+            for pic in sl["pictures"]:
+                crop = tuple(round(c, 4) for c in (pic.get("crop") or (0.0, 0.0, 0.0, 0.0)))
+                variants = crops_by_part.setdefault(pic["src"], [])
+                if crop not in variants:
+                    variants.append(crop)
+
         def bake_name(part: str, crop: tuple) -> str:
             stem = Path(part).stem
-            if not any(crop):
-                return f"{stem}.webp"
-            tag = hashlib.sha1(",".join(f"{c:.4f}" for c in crop).encode()).hexdigest()[:6]
-            return f"{stem}-{tag}.webp"
+            variants = crops_by_part.get(part, [crop])
+            idx = variants.index(crop) if crop in variants else 0
+            return f"{stem}.webp" if idx == 0 else f"{stem}-{idx + 1}.webp"
 
         for old in (OUT / "media").glob("*.webp"):
             old.unlink()                      # regenerate from scratch so no stale crop lingers
@@ -901,7 +912,7 @@ def main() -> None:
         wanted: dict[tuple[str, tuple], str] = {}
         for sl in slides:
             for pic in sl["pictures"]:
-                crop = tuple(pic.get("crop") or (0.0, 0.0, 0.0, 0.0))
+                crop = tuple(round(c, 4) for c in (pic.get("crop") or (0.0, 0.0, 0.0, 0.0)))
                 wanted[(pic["src"], crop)] = bake_name(pic["src"], crop)
 
         for (part, crop), name in wanted.items():
@@ -920,7 +931,7 @@ def main() -> None:
             media_index[name] = {"part": part, "crop": list(crop), "bytes": dest.stat().st_size}
         for sl in slides:
             for pic in sl["pictures"]:
-                crop = tuple(pic.get("crop") or (0.0, 0.0, 0.0, 0.0))
+                crop = tuple(round(c, 4) for c in (pic.get("crop") or (0.0, 0.0, 0.0, 0.0)))
                 pic["src"] = wanted[(pic["src"], crop)]
 
     grids = sum(1 for sl in slides if normalise_grids(sl))
