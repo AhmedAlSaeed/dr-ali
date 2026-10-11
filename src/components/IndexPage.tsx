@@ -1,7 +1,5 @@
 import { ArrowRight, Check, RotateCcw } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Disclosures } from "@/components/Disclosures";
 import { Masthead } from "@/components/Masthead";
 import type { Deck } from "@/lib/deck";
@@ -11,7 +9,6 @@ import { cn } from "@/lib/utils";
 export function IndexPage({ deck }: { deck: Deck }) {
   const progress = useProgress();
   const total = deck.cases.length;
-  const pct = (progress.count / total) * 100;
   const last = progress.last;
   const lastCase = last ? deck.cases.find((c) => c.n === last.caseN) : undefined;
 
@@ -21,8 +18,21 @@ export function IndexPage({ deck }: { deck: Deck }) {
 
       {/* progress only appears once there is some, and stays a single slim line */}
       {progress.count > 0 && (
-        <div className="mt-6 flex items-center gap-3" data-progress-summary>
-          <Progress value={pct} className="h-1.5 max-w-56 flex-1" />
+        <div className="mt-6 flex flex-wrap items-center gap-3" data-progress-summary>
+          {/* one pill per case: the same progress language as the case view */}
+          <span className="flex flex-wrap items-center gap-1.5" aria-hidden>
+            {deck.cases.map((c) => (
+              <span
+                key={c.n}
+                data-case-pill={c.n}
+                data-filled={!!progress.done[c.n]}
+                className={cn(
+                  "h-2 w-7 rounded-full transition-colors",
+                  progress.done[c.n] ? "bg-brand" : "bg-muted-foreground/20",
+                )}
+              />
+            ))}
+          </span>
           <span className="text-muted-foreground text-xs tabular-nums">
             {progress.count} of {total} complete
           </span>
@@ -93,13 +103,6 @@ export function IndexPage({ deck }: { deck: Deck }) {
                 </CardTitle>
                 <ArrowRight className="text-muted-foreground size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
               </CardHeader>
-              {done && c.companion && (
-                <CardContent className="flex items-center pl-[3.25rem] pt-1">
-                  <Badge variant="brand" className="font-normal">
-                    + {c.companion}
-                  </Badge>
-                </CardContent>
-              )}
             </Card>
           );
         })}

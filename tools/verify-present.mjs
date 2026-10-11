@@ -87,7 +87,7 @@ let label = "";
 for (let i = 0; i < 30 && label !== "Next case"; i++) {
   await page.click("[data-forward]");
   await settle(200);
-  label = await page.$eval("[data-forward]", (e) => (e.textContent ?? "").trim());
+  label = await page.$eval("[data-forward]", (e) => e.getAttribute("aria-label") ?? "");
 }
 ok("reached the end of case 1 in presentation", label === "Next case", label);
 await page.click("[data-forward]");

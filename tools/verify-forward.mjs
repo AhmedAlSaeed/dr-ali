@@ -6,7 +6,10 @@ const p = await b.newPage();
 await p.setViewport({ width: 1280, height: 900 });
 const settle = (ms = 700) => new Promise((r) => setTimeout(r, ms));
 const ok = (l, pass, extra = "") => console.log(`  ${pass ? "PASS" : "FAIL"}  ${l}${extra ? "  " + extra : ""}`);
-const label = () => p.$eval("[data-forward]", (e) => (e.textContent ?? "").trim());
+const label = async () => {
+  await p.waitForSelector("[data-forward]", { timeout: 8000 });
+  return p.$eval("[data-forward]", (e) => e.getAttribute("aria-label") ?? "");
+};
 const clickForward = () => p.click("[data-forward]");
 const hash = () => p.evaluate(() => location.hash);
 const slideIndex = () => p.$eval("[data-slide-index]", (e) => e.getAttribute("data-slide-index"));
@@ -17,8 +20,15 @@ await settle(1100);
 ok("mid-case the header control says Next", (await label()) === "Next", await label());
 ok("the header keeps the case menu for jumping between cases", await hasCaseMenu());
 
-for (let i = 0; i < 14; i++) { await p.keyboard.press("ArrowRight"); await settle(130); }
-ok("at the end it says Next case", (await label()) === "Next case", await label());
+// press until the case is finished: one more press would move into the next case
+let endLabel = "";
+for (let i = 0; i < 30; i++) {
+  endLabel = await label();
+  if (endLabel === "Next case") break;
+  await p.keyboard.press("ArrowRight");
+  await settle(140);
+}
+ok("at the end it says Next case", endLabel === "Next case", endLabel);
 ok("and the forward control is the only Next case affordance", (await p.$$('[data-forward]')).length === 1);
 
 await clickForward();
@@ -30,8 +40,15 @@ ok("clicking it opens the next case at its first slide",
 // the last case has nowhere to go next
 await p.goto(`${BASE}/#/c/12`, { waitUntil: "networkidle0" });
 await settle(900);
-for (let i = 0; i < 16; i++) { await p.keyboard.press("ArrowRight"); await settle(130); }
-ok("on the last case it says Back to index", (await label()) === "Back to index", await label());
+// walk to the end of the last case: further presses would leave it, so stop at the last slide
+let lastLabel = "";
+for (let i = 0; i < 30; i++) {
+  lastLabel = await label();
+  if (lastLabel === "Back to index" || lastLabel === "Next case") break;
+  await p.keyboard.press("ArrowRight");
+  await settle(140);
+}
+ok("on the last case it says Back to index", lastLabel === "Back to index", lastLabel);
 await clickForward();
 await settle(700);
 ok("clicking it returns to the index", (await hash()) === "#/", await hash());

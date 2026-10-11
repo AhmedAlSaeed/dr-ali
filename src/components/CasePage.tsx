@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowRight,
   Check,
   ChevronLeft,
+  ChevronRight,
+  ChevronsRight,
   CornerDownLeft,
   Info,
+  LayoutGrid,
   ListChecks,
   Maximize2,
   Minimize2,
@@ -12,7 +14,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { CaseMenu } from "@/components/CaseMenu";
 import { Lightbox } from "@/components/Lightbox";
@@ -244,11 +245,6 @@ export function CasePage({
     return () => window.removeEventListener("keydown", onKey);
   }, [forward, prev, onExit, nextHref, prevHref, present, enterPresent, exitPresent]);
 
-  // full at the end of the last slide: the step fraction is divided by the step count, not
-  // by steps+1, otherwise the bar could never reach 100%
-  const stepFraction = steps > 0 ? Math.min(step, steps) / steps : 1;
-  const caseProgress = ((index + stepFraction) / positions.length) * 100;
-
   const stepDots = steps > 0 && (
     <span className="flex items-center gap-1">
       {Array.from({ length: steps + 1 }).map((_, i) => (
@@ -309,10 +305,15 @@ export function CasePage({
             onClick={forward}
             aria-label={forwardLabel}
             data-forward
-            className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs transition-colors hover:bg-current/10"
+            className="rounded-md p-1.5 transition-colors hover:bg-current/10"
           >
-            {forwardLabel}
-            <ChevronLeft className="size-4 rotate-180" />
+            {!atEnd ? (
+              <ChevronRight className="size-4" />
+            ) : nextHref ? (
+              <ChevronsRight className="size-4" />
+            ) : (
+              <LayoutGrid className="size-4" />
+            )}
           </button>
           <button
             type="button"
@@ -365,19 +366,24 @@ export function CasePage({
         <div className="ml-auto flex items-center gap-2">
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={prev}
             disabled={index === 0 && step === 0}
             aria-label="Previous slide"
             data-back
           >
             <ChevronLeft className="size-4" />
-            <span className="hidden sm:inline">Prev</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={forward} data-forward aria-label={forwardLabel}>
-            <span className="hidden sm:inline">{forwardLabel}</span>
-            <ChevronLeft className="size-4 rotate-180 sm:hidden" />
-            <ArrowRight className="hidden size-4 sm:inline" />
+          {/* arrows only: a single chevron advances, a double one moves to the next case,
+              and the index icon appears after the last case */}
+          <Button variant="outline" size="icon" onClick={forward} data-forward aria-label={forwardLabel}>
+            {!atEnd ? (
+              <ChevronRight className="size-4" />
+            ) : nextHref ? (
+              <ChevronsRight className="size-4" />
+            ) : (
+              <LayoutGrid className="size-4" />
+            )}
           </Button>
           <Button
             variant="ghost"
@@ -417,29 +423,28 @@ export function CasePage({
           </Button>
         )}
 
-        {/* position indicator, no slide numbers: click a segment to jump */}
-        <div className="ml-auto flex flex-wrap items-center gap-1" data-slide-index={index}>
+        {/* progress as pills: one per slide, filled up to where you are. click to jump */}
+        <div className="ml-auto flex flex-wrap items-center gap-1.5" data-slide-index={index}>
           {positions.map((p, i) => (
             <button
               key={p}
               data-slide-nav={i}
+              data-pill={i}
+              data-filled={i <= index}
               aria-label={`Go to position ${i + 1}`}
+              title={`Slide ${i + 1}`}
               onClick={() => goTo(i)}
               className={cn(
-                "h-1.5 w-6 rounded-full transition-colors",
+                "h-2 w-7 rounded-full transition-colors",
                 i === index
                   ? "bg-brand"
                   : i < index
-                    ? "bg-muted-foreground/50 hover:bg-muted-foreground"
+                    ? "bg-brand/45 hover:bg-brand/70"
                     : "bg-muted-foreground/20 hover:bg-muted-foreground/40",
               )}
             />
           ))}
         </div>
-      </div>
-
-      <div className="h-1">
-        <Progress value={caseProgress} />
       </div>
 
       {showNotes && slide.notes && (

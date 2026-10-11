@@ -519,7 +519,8 @@ GRID_MARGIN = 0.05          # inches kept clear of the slide edge
 GRID_GAP = 0.08             # inches between images in a row / between rows
 
 
-def _label_band(slide: dict, top: float, bottom: float, pics: list[dict]) -> tuple[float, float]:
+def _label_band(slide: dict, top: float, bottom: float,
+                pics: list[dict]) -> tuple[float, float, str]:
     """Horizontal band a grid may use without covering text.
 
     Two cases matter here:
@@ -532,7 +533,7 @@ def _label_band(slide: dict, top: float, bottom: float, pics: list[dict]) -> tup
     """
     pic_x0 = min(p["x"] for p in pics)
     pic_x1 = max(p["x"] + p["w"] for p in pics)
-    left, right = GRID_MARGIN, SLIDE_W - GRID_MARGIN
+    left, right, side = GRID_MARGIN, SLIDE_W - GRID_MARGIN, "none"
     for t in slide["texts"]:
         w, h = t["w"], t["h"]
         if w <= 0 or h <= 0:
@@ -547,15 +548,17 @@ def _label_band(slide: dict, top: float, bottom: float, pics: list[dict]) -> tup
         x0, x1 = cx - bw / 2, cx + bw / 2
         if x1 <= pic_x0 + 0.15:                        # sits beside the pictures, to the left
             left = max(left, x1 + GRID_GAP)
+            side = "left"
         elif x0 >= pic_x1 - 0.15:                      # beside them, to the right
             right = min(right, x0 - GRID_GAP)
+            side = side if side == "left" else "right"
         elif bw <= 2.0 and x1 <= SLIDE_W / 3:           # narrow edge label, left
             left = max(left, x1 + GRID_GAP)
         elif bw <= 2.0 and x0 >= 2 * SLIDE_W / 3:       # narrow edge label, right
             right = min(right, x0 - GRID_GAP)
     if right - left < 2.0:                             # never squeeze the grid to nothing
-        return GRID_MARGIN, SLIDE_W - GRID_MARGIN
-    return left, right
+        return GRID_MARGIN, SLIDE_W - GRID_MARGIN, side
+    return left, right, side
 
 
 def _cluster_rows(pics: list[dict], tol: float = 0.6) -> list[list[dict]]:
@@ -606,16 +609,33 @@ def normalise_grids(slide: dict) -> bool:
 
     total_w = sum(col_w) + GRID_GAP * (columns - 1)
     total_h = sum(row_h) + GRID_GAP * (len(rows) - 1)
-    # stay clear of row labels that sit beside the grid
-    band_l, band_r = _label_band(slide, min(p["y"] for p in pics),
-                                 max(p["y"] + p["h"] for p in pics), pics)
-    avail_w, avail_h = max(2.0, band_r - band_l), SLIDE_H - 2 * GRID_MARGIN
-    scale = min(1.0, avail_w / total_w, avail_h / total_h)
+    # stay clear of text that sits beside the grid; `side` says which side that is
+    band_l, band_r, side = _label_band(slide, min(p["y"] for p in pics),
+                                       max(p["y"] + p["h"] for p in pics), pics)
+    band_l += GRID_GAP
+    band_r -= GRID_GAP
+    pic_x0, pic_x1 = min(p["x"] for p in pics), max(p["x"] + p["w"] for p in pics)
+
+    if side == "left":                 # hug the text, as the deck does, so a wide title
+        left_edge = max(band_l, pic_x0)  # cannot end up over the pictures
+        avail_w = band_r - left_edge
+    elif side == "right":
+        left_edge, avail_w = band_l, min(band_r, pic_x1) - band_l
+    else:
+        left_edge, avail_w = band_l, band_r - band_l
+
+    avail_h = SLIDE_H - 2 * GRID_MARGIN
+    scale = min(1.0, max(2.0, avail_w) / total_w, avail_h / total_h)
     col_w = [w * scale for w in col_w]
     row_h = [h * scale for h in row_h]
     total_w, total_h = sum(col_w) + GRID_GAP * (columns - 1), sum(row_h) + GRID_GAP * (len(rows) - 1)
 
-    x0 = band_l + (avail_w - total_w) / 2
+    if side == "right":
+        x0 = left_edge + (avail_w - total_w)
+    elif side == "left":
+        x0 = left_edge
+    else:
+        x0 = left_edge + (avail_w - total_w) / 2
     y0 = (SLIDE_H - total_h) / 2
     y = y0
     for row, h in zip(rows, row_h):

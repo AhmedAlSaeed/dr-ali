@@ -16,7 +16,7 @@ const settle = (ms = 700) => new Promise((r) => setTimeout(r, ms));
 const ok = (l, pass, extra = "") => console.log(`  ${pass ? "PASS" : "FAIL"}  ${l}${extra ? "  " + extra : ""}`);
 const hash = () => p.evaluate(() => location.hash);
 const slideIndex = () => p.$eval("[data-slide-index]", (e) => Number(e.getAttribute("data-slide-index")));
-const forwardLabel = () => p.$eval("[data-forward]", (e) => (e.textContent ?? "").trim());
+const forwardLabel = () => p.$eval("[data-forward]", (e) => e.getAttribute("aria-label") ?? "");
 const click = (sel) => p.click(sel);
 const swipe = (dx) =>
   p.evaluate((d) => {
