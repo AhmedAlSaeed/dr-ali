@@ -375,8 +375,15 @@ export function CasePage({
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 md:px-6 md:py-8">
       <header className="flex flex-wrap items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={onExit} className="gap-1.5">
-          <House className="size-4" /> Index
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onExit}
+          aria-label="Back to index"
+          title="Back to index (esc)"
+          data-back-to-index
+        >
+          <House className="size-4" />
         </Button>
         <Separator orientation="vertical" className="h-5" />
         <CaseMenu
