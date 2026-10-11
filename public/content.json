@@ -81,7 +81,7 @@
     12
    ],
    "vignette": "A previously healthy 29-year-old man presents with a two-day history of a mild febrile illness, followed by rapidly progressive altered mental status and generalized seizures. On arrival he is encephalopathic with a depressed level of consciousness.",
-   "diagnosis": "Influenza-Associated Acute Necrotizing Encephalopathy",
+   "diagnosis": "Acute Necrotizing Encephalopathy",
    "companion": "Artery of Percheron infarct",
    "slideTitles": [
     "Influenza-Associated Acute Necrotizing Encephalopathy",
@@ -102,7 +102,7 @@
     18
    ],
    "vignette": "A 62-year-old man underwent multilevel ACDF (C3–C7) for degenerative cervical stenosis. He awoke at his neurologic baseline. One day postoperatively, he developed progressive weakness, deteriorating to quadriplegia.",
-   "diagnosis": "Cervical Cord Reperfusion Injury",
+   "diagnosis": "Reperfusion Injury",
    "companion": "Cerebral hyperperfusion syndrome",
    "slideTitles": [
     "Cervical Cord Reperfusion Injury",
@@ -122,7 +122,7 @@
     24
    ],
    "vignette": "A 23-year-old man presents with a progressively worsening headache. An MRI performed at an OSH reportedly demonstrated a lesion suggestive of a colloid cyst.",
-   "diagnosis": "Adamantinomatous Craniopharyngioma",
+   "diagnosis": "Craniopharyngioma",
    "companion": "Papillary craniopharyngioma",
    "slideTitles": [
     "Adamantinomatous Craniopharyngioma",
@@ -144,7 +144,7 @@
     32
    ],
    "vignette": "A 40-year-old woman presented to the emergency department with headache and confusion.",
-   "diagnosis": "Skull Base Chondrosarcoma",
+   "diagnosis": "Chondrosarcoma",
    "companion": "Chordoma",
    "slideTitles": [
     "Skull Base Chondrosarcoma",
@@ -236,7 +236,7 @@
     57
    ],
    "vignette": "A 23-year-old man with sickle cell disease presents with a sudden decrease in level of consciousness.",
-   "diagnosis": "Non-Traumatic Fat Embolism",
+   "diagnosis": "Fat Embolism",
    "companion": null,
    "slideTitles": [
     "Non-Traumatic Fat Embolism",
@@ -296,7 +296,7 @@
     77
    ],
    "vignette": "A 58-year-old male presented with a firm, midline neck swelling of 1 month’s duration.",
-   "diagnosis": "Papillary Carcinoma in Thyroglossal Duct Cyst",
+   "diagnosis": "Thyroglossal Duct Cyst Ca",
    "companion": null,
    "slideTitles": [
     "Papillary Carcinoma in Thyroglossal Duct Cyst"

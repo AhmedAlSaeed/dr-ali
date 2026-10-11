@@ -44,6 +44,8 @@ ranges and slide counts are not shown anywhere.
 **Case view** — the slides, plus:
 
 - a **case dropdown in the header**, so you can jump between cases without going back to the index
+- the primary control follows the case: **Next** while slides remain, then **Next case** at the end
+  (or **Back to index** on case 12), so a case flows straight into the next one
 - a numberless position indicator (click to jump), speaker notes, click-to-zoom images, progress
   that reaches 100% exactly when the last slide is exhausted
 - a case is marked complete **the moment its last slide is displayed**, and the index then
@@ -122,7 +124,7 @@ plan. For a private repo, Cloudflare Pages (or Netlify/Vercel) builds the same `
 
 ```
 tools/extract.py          deck -> content.json (+ media + logo). The only deck-aware code.
-tools/cases.json          hand-checked case labels (dx + companion)
+tools/cases.json          case names as specified by the presenter (+ companion labels)
 tools/deck-meta.json      conference identity + Conflict of Interest / Accreditation content
 tools/audit-slides.mjs    every slide: text overflow / outside-slide check
 tools/verify-site.mjs     behaviour: index, spoilers, reveal, images, completion, counter

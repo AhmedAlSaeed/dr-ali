@@ -79,6 +79,18 @@ export function CasePage({
     }
   }, [step, index, positions, deck]);
 
+  // At the end of a case the primary button moves on: to the next case, or to the index when
+  // there is no next case.
+  const forwardLabel = atEnd ? (nextHref ? "Next case" : "Back to index") : "Next";
+  const forward = useCallback(() => {
+    if (!atEnd) {
+      next();
+      return;
+    }
+    if (nextHref) window.location.hash = nextHref;
+    else onExit();
+  }, [atEnd, next, nextHref, onExit]);
+
   const goTo = useCallback((i: number) => {
     setIndex(i);
     setStep(0);
@@ -267,8 +279,13 @@ export function CasePage({
               <ChevronLeft className="size-4" /> Prev
             </Button>
           )}
-          {nextHref && (
-            <Button variant="outline" size="sm" onClick={() => (window.location.hash = nextHref)}>
+          {nextHref && !atEnd && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => (window.location.hash = nextHref)}
+              data-jump-next
+            >
               Next case <ChevronLeft className="size-4 rotate-180" />
             </Button>
           )}
@@ -304,8 +321,8 @@ export function CasePage({
           <Button variant="secondary" size="sm" onClick={prev} disabled={index === 0 && step === 0}>
             <ArrowLeft className="size-4" />
           </Button>
-          <Button variant="secondary" size="sm" onClick={next}>
-            {atEnd ? "Finished" : "Next"} <ArrowRight className="size-4" />
+          <Button variant="secondary" size="sm" onClick={forward} data-forward>
+            {forwardLabel} <ArrowRight className="size-4" />
           </Button>
         </div>
 
@@ -367,11 +384,6 @@ export function CasePage({
             <Button onClick={onExit} className="gap-2">
               <CornerDownLeft className="size-4" /> Back to index
             </Button>
-            {nextHref && (
-              <Button variant="secondary" onClick={() => (window.location.hash = nextHref)}>
-                Next case <ArrowRight className="size-4" />
-              </Button>
-            )}
             <Button variant="ghost" className="gap-2" onClick={() => progress.setDone(caseN, false)}>
               <Undo2 className="size-4" /> Undo
             </Button>
