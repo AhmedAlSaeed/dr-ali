@@ -431,7 +431,7 @@
    "chrome": [
     {
      "kind": "image",
-     "src": "ppt/media/image1.jpeg",
+     "src": "image1.webp",
      "alt": "",
      "x": 0.0,
      "y": 0.0,
@@ -467,7 +467,7 @@
     },
     {
      "kind": "image",
-     "src": "ppt/media/image2.jpg",
+     "src": "image2.webp",
      "alt": "",
      "x": 7.889,
      "y": 6.645,
@@ -685,7 +685,7 @@
     },
     {
      "kind": "image",
-     "src": "ppt/media/image3.png",
+     "src": "image3.webp",
      "alt": "",
      "x": 0.111,
      "y": 6.915,
@@ -932,7 +932,7 @@
     },
     {
      "kind": "image",
-     "src": "ppt/media/image3.png",
+     "src": "image3.webp",
      "alt": "",
      "x": 0.111,
      "y": 6.915,
@@ -11973,7 +11973,7 @@
    "chrome": [
     {
      "kind": "image",
-     "src": "ppt/media/image4.jpeg",
+     "src": "image4.webp",
      "alt": "",
      "x": 0.0,
      "y": 0.0,
@@ -12000,7 +12000,7 @@
     },
     {
      "kind": "image",
-     "src": "ppt/media/image5.jpg",
+     "src": "image5.webp",
      "alt": "",
      "x": 4.667,
      "y": 5.821,

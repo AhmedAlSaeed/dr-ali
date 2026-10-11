@@ -1,4 +1,24 @@
 {
+ "image1.webp": {
+  "part": "ppt/media/image1.jpeg",
+  "crop": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "bytes": 29174
+ },
+ "image2.webp": {
+  "part": "ppt/media/image2.jpg",
+  "crop": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "bytes": 40396
+ },
  "image3.webp": {
   "part": "ppt/media/image3.png",
   "crop": [

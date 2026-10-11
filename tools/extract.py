@@ -893,6 +893,12 @@ def main() -> None:
         # intermediate cache) still holding the previous content.json — the old names must
         # keep resolving.
         crops_by_part: dict[str, list[tuple]] = {}
+        for sl in slides:                                   # chrome first: it claims the plain name
+            for ch in sl.get("chrome", []):
+                if ch.get("kind") == "image":
+                    variants = crops_by_part.setdefault(ch["src"], [])
+                    if (0.0, 0.0, 0.0, 0.0) not in variants:
+                        variants.append((0.0, 0.0, 0.0, 0.0))
         for sl in slides:
             for pic in sl["pictures"]:
                 crop = tuple(round(c, 4) for c in (pic.get("crop") or (0.0, 0.0, 0.0, 0.0)))
@@ -911,6 +917,9 @@ def main() -> None:
 
         wanted: dict[tuple[str, tuple], str] = {}
         for sl in slides:
+            for ch in sl.get("chrome", []):
+                if ch.get("kind") == "image":
+                    wanted[(ch["src"], (0.0, 0.0, 0.0, 0.0))] = bake_name(ch["src"], (0.0, 0.0, 0.0, 0.0))
             for pic in sl["pictures"]:
                 crop = tuple(round(c, 4) for c in (pic.get("crop") or (0.0, 0.0, 0.0, 0.0)))
                 wanted[(pic["src"], crop)] = bake_name(pic["src"], crop)
@@ -930,6 +939,9 @@ def main() -> None:
                 im.save(dest, "WEBP", quality=QUALITY, method=5)
             media_index[name] = {"part": part, "crop": list(crop), "bytes": dest.stat().st_size}
         for sl in slides:
+            for ch in sl.get("chrome", []):
+                if ch.get("kind") == "image":
+                    ch["src"] = wanted[(ch["src"], (0.0, 0.0, 0.0, 0.0))]
             for pic in sl["pictures"]:
                 crop = tuple(round(c, 4) for c in (pic.get("crop") or (0.0, 0.0, 0.0, 0.0)))
                 pic["src"] = wanted[(pic["src"], crop)]
