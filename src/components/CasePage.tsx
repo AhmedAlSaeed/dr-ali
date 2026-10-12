@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Check,
   ChevronLeft,
   ChevronRight,
   House,
@@ -8,7 +7,6 @@ import {
   ListChecks,
   Maximize2,
   Minimize2,
-  Undo2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -464,27 +462,6 @@ export function CasePage({
             </CardTitle>
           </CardHeader>
           <CardContent className="text-muted-foreground text-sm">{slide.notes}</CardContent>
-        </Card>
-      )}
-
-      {atEnd && caseN && (
-        <Card className="border-brand/40 bg-brand/[0.04]">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Check className="text-brand size-4" /> Case {caseN} marked complete
-            </CardTitle>
-            <p className="text-muted-foreground text-sm">
-              Stored on this device — the index shows the diagnosis once a case is complete.
-            </p>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-2">
-            <Button onClick={onExit} className="gap-2">
-              <House className="size-4" /> Back to index
-            </Button>
-            <Button variant="ghost" className="gap-2" onClick={() => progress.setDone(caseN, false)}>
-              <Undo2 className="size-4" /> Undo
-            </Button>
-          </CardContent>
         </Card>
       )}
 
