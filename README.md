@@ -1,6 +1,6 @@
 # Fellow Case Conference — website
 
-**Live: <https://alihy8.github.io/casebook/>** · repo: `alihy8/casebook`
+**Live: <https://alihy8.github.io/emory/>** · repo: `alihy8/casebook`
 
 A small static site for the twelve-case neuroradiology conference, built from
 `AliFellow.pptx`. Replaces the macro-driven PowerPoint flow: no `.pptm`, no macro prompts,
