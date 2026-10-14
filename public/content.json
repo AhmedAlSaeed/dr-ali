@@ -135,6 +135,7 @@
    "end": 32,
    "slides": [
     25,
+    25.5,
     26,
     27,
     28,
@@ -4379,6 +4380,37 @@
    "bg": null
   },
   {
+   "pos": 25.5,
+   "part": "custom/case4-slide2-image.xml",
+   "title": "",
+   "texts": [],
+   "pictures": [
+    {
+     "src": "case4-slide2-image3-cropped.jpeg",
+     "alt": "",
+     "x": 4.17,
+     "y": 0.45,
+     "w": 4.99,
+     "h": 6.6,
+     "crop": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "grouped": false
+    }
+   ],
+   "chrome": [],
+   "ownContent": true,
+   "table": null,
+   "tableBox": null,
+   "notes": "",
+   "fromLayout": false,
+   "reveal": [],
+   "bg": null
+  },
+  {
    "pos": 26,
    "part": "ppt/slides/slide26.xml",
    "title": "",
@@ -4405,21 +4437,6 @@
      "x": 4.69,
      "y": 1.35,
      "w": 4.38,
-     "h": 4.8,
-     "crop": [
-      0.0,
-      0.0,
-      0.0,
-      0.0
-     ],
-     "grouped": false
-    },
-    {
-     "src": "case4-slide2-image3-cropped.jpeg",
-     "alt": "",
-     "x": 9.27,
-     "y": 1.35,
-     "w": 3.63,
      "h": 4.8,
      "crop": [
       0.0,
