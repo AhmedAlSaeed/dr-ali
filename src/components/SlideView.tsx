@@ -7,6 +7,11 @@ import { cn } from "@/lib/utils";
 const ROLE_PT: Record<TextBlock["role"], number> = { title: 32, subtitle: 20, body: 16, text: 16 };
 const BULLET_FALLBACK: Record<number, string> = { 0: "\u2022", 1: "\u25e6", 2: "\u25aa" };
 
+// Correct option indexes for the multiple choice slides in the case deck.
+const QUIZ_ANSWERS: Record<number, number> = {
+  8: 3, 15: 2, 21: 2, 29: 3, 35: 1, 39: 4, 44: 0, 50: 1, 67: 2,
+};
+
 function luminance(hex: string) {
   const n = parseInt(hex, 16);
   const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
@@ -95,6 +100,9 @@ export function SlideView({
   onImageClick?: (picture: Picture) => void;
 }) {
   const theme = slideTheme(slide);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  useEffect(() => setSelectedAnswer(null), [slide.pos]);
+  const correctAnswer = QUIZ_ANSWERS[slide.pos];
 
   return (
     <div
@@ -214,6 +222,9 @@ export function SlideView({
         const fontScale = t.fontScale ?? 1;
         // the deck sets line spacing per level (90%) and a per-level space-before
         const lnReduction = t.lnSpcReduction ?? 0;
+        const isQuizBlock = correctAnswer !== undefined && t.paras.some((p) =>
+          p.runs.map((r) => r.t).join("").trim().endsWith("?")
+        );
 
         return (
           <div
@@ -247,9 +258,41 @@ export function SlideView({
                     bullet === "num"
                       ? t.paras.slice(0, pi + 1).filter((q) => q.bullet === "num" && q.lvl === p.lvl).length
                       : 0;
+                  const optionIndex = p.bullet === "num"
+                    ? t.paras.slice(0, pi).filter((q) => q.bullet === "num").length
+                    : -1;
+                  const isOption = isQuizBlock && optionIndex >= 0;
+                  const revealed = selectedAnswer !== null;
+                  const optionState = isOption && revealed
+                    ? optionIndex === correctAnswer
+                      ? "correct"
+                      : optionIndex === selectedAnswer
+                        ? "wrong"
+                        : ""
+                    : "";
                   return (
                     <p
                       key={pi}
+                      className={cn(
+                        isOption && "quiz-option",
+                        optionState === "correct" && "quiz-option-correct",
+                        optionState === "wrong" && "quiz-option-wrong",
+                        isOption && !revealed && "quiz-option-idle",
+                      )}
+                      role={isOption ? "button" : undefined}
+                      tabIndex={isOption ? 0 : undefined}
+                      aria-pressed={isOption ? selectedAnswer === optionIndex : undefined}
+                      onClick={isOption ? (e) => {
+                        e.stopPropagation();
+                        if (selectedAnswer === null) setSelectedAnswer(optionIndex);
+                      } : undefined}
+                      onKeyDown={isOption ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (selectedAnswer === null) setSelectedAnswer(optionIndex);
+                        }
+                      } : undefined}
                       style={{
                         margin: 0,
                         marginBottom: "0.35em",
@@ -260,8 +303,10 @@ export function SlideView({
                           : undefined,
                         textAlign: p.algn === "ctr" ? "center" : p.algn === "r" ? "right" : "left",
                         whiteSpace: t.wrap === "none" ? "nowrap" : undefined,
-                        paddingLeft: bullet === "none" ? 0 : pad,
+                        paddingLeft: isOption ? `calc(${pad}px + 0.85em)` : bullet === "none" ? 0 : pad,
                         textIndent: bullet === "none" ? 0 : hang,
+                        paddingRight: isOption ? "1em" : undefined,
+                        cursor: isOption ? (revealed ? "default" : "pointer") : undefined,
                       }}
                     >
                       {bullet !== "none" && (
